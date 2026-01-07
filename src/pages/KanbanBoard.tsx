@@ -1,12 +1,11 @@
-import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
-import { mockPRDs } from '@/data/mockData';
+import { usePRDs } from '@/context/PRDContext';
 import { PRD, PRDStatus } from '@/types/prd';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import PriorityIndicator from '@/components/prd/PriorityIndicator';
 import { Progress } from '@/components/ui/progress';
-import { Calendar, GripVertical } from 'lucide-react';
+import { Calendar, GripVertical, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Column {
@@ -16,11 +15,11 @@ interface Column {
 }
 
 const columns: Column[] = [
-  { id: 'draft', title: 'Draft', color: 'bg-muted-foreground' },
-  { id: 'in-progress', title: 'In Progress', color: 'bg-status-in-progress' },
-  { id: 'review', title: 'In Review', color: 'bg-status-review' },
-  { id: 'approved', title: 'Approved', color: 'bg-status-done' },
-  { id: 'blocked', title: 'Blocked', color: 'bg-status-blocked' },
+  { id: 'backlog', title: 'Backlog', color: 'bg-muted-foreground' },
+  { id: 'research', title: 'Research', color: 'bg-blue-500' },
+  { id: 'in-progress', title: 'In Progress', color: 'bg-amber-500' },
+  { id: 'review', title: 'Review', color: 'bg-purple-500' },
+  { id: 'complete', title: 'Complete', color: 'bg-green-500' },
 ];
 
 const KanbanCard = ({ prd }: { prd: PRD }) => {
@@ -99,11 +98,21 @@ const KanbanColumn = ({ column, prds }: { column: Column; prds: PRD[] }) => {
 };
 
 const KanbanBoard = () => {
-  const [prds] = useState(mockPRDs);
+  const { prds, isLoading } = usePRDs();
 
   const getPRDsByStatus = (status: PRDStatus) => {
     return prds.filter((prd) => prd.status === status);
   };
+
+  if (isLoading) {
+    return (
+      <Layout title="Kanban Board" subtitle="Visualize PRD workflow">
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Kanban Board" subtitle="Visualize PRD workflow">
