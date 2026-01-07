@@ -3,15 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import Layout from './Layout';
+import Layout from '@/components/layout/Layout';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function ExecutiveDashboard() {
   const metrics = {
-    prdsCreated: { value: 47, change: 85, trend: 'up' },
-    avgCycleTime: { value: 8.2, change: -47, trend: 'down' },
-    pmTimeSaved: { value: 62, change: 12, trend: 'up' },
-    adoptionRate: { value: 73, change: 8, trend: 'up' },
+    prdsCreated: { value: 47, change: 85, trend: 'up' as const },
+    avgCycleTime: { value: 8.2, change: -47, trend: 'down' as const },
+    pmTimeSaved: { value: 62, change: 12, trend: 'up' as const },
+    adoptionRate: { value: 73, change: 8, trend: 'up' as const },
   };
 
   const healthIndicators = [
