@@ -19,11 +19,25 @@ const Stakeholders = () => {
   };
 
   const getPRDCount = (stakeholderId: string) => {
-    return prds.filter((prd) =>
-      prd.sections.some((section) =>
-        section.assignedStakeholders.some((s) => s.stakeholderId === stakeholderId)
-      )
-    ).length;
+    return prds.filter((prd: any) => {
+      const sections = Array.isArray(prd.sections) ? prd.sections : [];
+
+      return sections.some((section: any) => {
+        // New shape: assignedStakeholders: Array<{ stakeholderId: string; ... }>
+        if (Array.isArray(section.assignedStakeholders)) {
+          return section.assignedStakeholders.some(
+            (s: any) => s?.stakeholderId === stakeholderId
+          );
+        }
+
+        // Old shape fallback: assignedTo: Stakeholder[]
+        if (Array.isArray(section.assignedTo)) {
+          return section.assignedTo.some((s: any) => s?.id === stakeholderId);
+        }
+
+        return false;
+      });
+    }).length;
   };
 
   const functionColors: Record<StakeholderFunction, string> = {
