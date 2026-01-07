@@ -11,33 +11,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PRD, PRDStatus, PRDSection } from '@/types/prd';
-import { usePRDs } from '@/context/PRDContext';
-import { calculatePRDProgress } from '@/data/mockData';
-import SectionCard from '@/components/prd/SectionCard';
-import Layout from '@/components/layout/Layout';
+import { PRD, PRDStatus } from '@/types';
+import { mockPRDs, calculatePRDProgress } from '@/data/mockData';
+import SectionCard from '@/components/SectionCard';
+import Layout from '@/components/Layout';
 
 export default function PRDDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { prds, updatePRD } = usePRDs();
   const [prd, setPRD] = useState<PRD | null>(null);
 
   useEffect(() => {
-    const foundPRD = prds.find((p) => p.id === id);
+    // In real app, fetch from API/context
+    const foundPRD = mockPRDs.find((p) => p.id === id);
     if (foundPRD) {
       setPRD(foundPRD);
     }
-  }, [id, prds]);
+  }, [id]);
 
   const handleStatusChange = (newStatus: PRDStatus) => {
     if (prd) {
-      updatePRD(prd.id, { status: newStatus });
       setPRD({ ...prd, status: newStatus });
+      // Update in context/API
     }
   };
 
-  const handleSectionUpdate = (sectionId: string, updates: Partial<PRDSection>) => {
+  const handleSectionUpdate = (sectionId: string, updates: Partial<PRD['sections'][0]>) => {
     if (!prd) return;
     
     const updatedSections = prd.sections.map((section) =>
@@ -51,7 +50,6 @@ export default function PRDDetail() {
       updatedAt: new Date().toISOString(),
     };
     
-    updatePRD(prd.id, { sections: updatedSections, progress: updatedPRD.progress });
     setPRD(updatedPRD);
   };
 
@@ -69,11 +67,11 @@ export default function PRDDetail() {
   }
 
   const statusColors: Record<PRDStatus, string> = {
-    backlog: 'bg-muted text-muted-foreground',
-    research: 'bg-blue-500 text-white',
-    waiting: 'bg-yellow-500 text-white',
-    review: 'bg-purple-500 text-white',
-    complete: 'bg-green-500 text-white',
+    backlog: 'bg-gray-500',
+    research: 'bg-blue-500',
+    waiting: 'bg-yellow-500',
+    review: 'bg-purple-500',
+    complete: 'bg-green-500',
   };
 
   const priorityColors = {
@@ -99,11 +97,11 @@ export default function PRDDetail() {
             Back to PRDs
           </Button>
 
-          <div className="bg-card rounded-lg shadow-sm border p-6">
+          <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <h1 className="text-3xl font-bold mb-2">{prd.title}</h1>
-                <p className="text-muted-foreground">{prd.description}</p>
+                <p className="text-gray-600">{prd.description}</p>
               </div>
               <Badge className={priorityColors[prd.priority]}>
                 {prd.priority}
@@ -113,32 +111,32 @@ export default function PRDDetail() {
             {/* Metrics Bar */}
             <div className="grid grid-cols-4 gap-4 mb-4">
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-muted-foreground" />
+                <User className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Owner</p>
+                  <p className="text-xs text-gray-500">Owner</p>
                   <p className="font-medium">{prd.owner}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <Calendar className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Target Date</p>
+                  <p className="text-xs text-gray-500">Target Date</p>
                   <p className="font-medium">
                     {new Date(prd.targetDate).toLocaleDateString()}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                <TrendingUp className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Progress</p>
+                  <p className="text-xs text-gray-500">Progress</p>
                   <p className="font-medium">{prd.daysInProgress} days</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Flag className="w-4 h-4 text-muted-foreground" />
+                <Flag className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Sections</p>
+                  <p className="text-xs text-gray-500">Sections</p>
                   <p className="font-medium">
                     {completedSections}/{totalSections}
                   </p>

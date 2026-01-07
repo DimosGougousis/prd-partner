@@ -1,6 +1,6 @@
 // Mock data utilities for development
 
-import { PRD, PRDSection, Stakeholder, SectionType, DashboardMetrics } from '@/types/prd';
+import { PRD, PRDSection, Stakeholder, SectionType } from '../types';
 
 export const SECTION_TYPES: Record<SectionType, { name: string; icon: string; description: string }> = {
   problem_statement: {
@@ -133,7 +133,7 @@ export function createDefaultSections(prdId: string): PRDSection[] {
     name: info.name,
     type: type as SectionType,
     content: '',
-    status: 'not_started' as const,
+    status: 'not_started',
     completeness: 0,
     assignedStakeholders: [],
     lastUpdated: new Date().toISOString(),
@@ -195,23 +195,6 @@ export const mockPRDs: PRD[] = [
     sections: [],
     tags: ['infrastructure', 'security', 'backend'],
     daysInProgress: 28,
-  },
-  {
-    id: 'prd-4',
-    title: 'Mobile Push Notifications',
-    description: 'Implement push notification system for mobile app engagement',
-    status: 'backlog',
-    progress: 0,
-    owner: 'Alex Kim',
-    ownerId: 'user-1',
-    priority: 'P2',
-    createdAt: '2026-01-05T10:00:00Z',
-    updatedAt: '2026-01-05T10:00:00Z',
-    targetDate: '2026-03-01T00:00:00Z',
-    template: 'feature',
-    sections: [],
-    tags: ['mobile', 'engagement', 'notifications'],
-    daysInProgress: 2,
   },
 ];
 
@@ -286,16 +269,3 @@ export function calculatePRDProgress(sections: PRDSection[]): number {
   const totalCompleteness = sections.reduce((sum, section) => sum + section.completeness, 0);
   return Math.round(totalCompleteness / sections.length);
 }
-
-export const mockMetrics: DashboardMetrics = {
-  prdsCreated: 12,
-  prdsCreatedChange: 15,
-  avgCycleTime: 14,
-  avgCycleTimeChange: -8,
-  pmTimeSaved: 42,
-  adoptionRate: 78,
-  agentPerformance: 92,
-  userSatisfaction: 4.5,
-  systemReliability: 99.8,
-  dataQuality: 94,
-};
