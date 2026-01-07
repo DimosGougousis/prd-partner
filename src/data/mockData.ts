@@ -1,226 +1,301 @@
-import { PRD, Stakeholder, DashboardMetrics } from '@/types/prd';
+// Mock data utilities for development
+
+import { PRD, PRDSection, Stakeholder, SectionType, DashboardMetrics } from '@/types/prd';
+
+export const SECTION_TYPES: Record<SectionType, { name: string; icon: string; description: string }> = {
+  problem_statement: {
+    name: 'Problem Statement',
+    icon: '🎯',
+    description: 'Define the user problem and desired outcome',
+  },
+  user_stories: {
+    name: 'User Stories & Requirements',
+    icon: '👥',
+    description: 'User stories and functional requirements',
+  },
+  success_metrics: {
+    name: 'Success Metrics & KPIs',
+    icon: '📊',
+    description: 'Measurable success criteria and KPIs',
+  },
+  technical_approach: {
+    name: 'Technical Approach',
+    icon: '🔧',
+    description: 'Architecture and implementation approach',
+  },
+  dependencies_risks: {
+    name: 'Dependencies & Risks',
+    icon: '⚠️',
+    description: 'Dependencies, risks, and mitigation strategies',
+  },
+  go_to_market: {
+    name: 'Go-to-Market Plan',
+    icon: '🚀',
+    description: 'Launch strategy and marketing approach',
+  },
+  resource_estimation: {
+    name: 'Resource Estimation',
+    icon: '⏱️',
+    description: 'Effort estimates and resource requirements',
+  },
+  legal_compliance: {
+    name: 'Legal & Compliance',
+    icon: '⚖️',
+    description: 'Legal requirements and compliance considerations',
+  },
+};
 
 export const mockStakeholders: Stakeholder[] = [
-  { id: '1', name: 'Sarah Chen', role: 'Engineering Lead', email: 'sarah@company.com', function: 'Engineering' },
-  { id: '2', name: 'Marcus Johnson', role: 'Design Lead', email: 'marcus@company.com', function: 'Design' },
-  { id: '3', name: 'Emily Rodriguez', role: 'Data Analyst', email: 'emily@company.com', function: 'Analytics' },
-  { id: '4', name: 'David Kim', role: 'QA Manager', email: 'david@company.com', function: 'Quality' },
-  { id: '5', name: 'Lisa Thompson', role: 'Product Director', email: 'lisa@company.com', function: 'Product' },
+  {
+    id: 'stakeholder-1',
+    name: 'Sarah Chen',
+    email: 'sarah.chen@company.com',
+    role: 'Engineering Lead, Payments',
+    function: 'engineering',
+    expertise: ['payment systems', 'checkout', 'integrations'],
+    responseRate: 92,
+    avgResponseTime: 1.2,
+    qualityScore: 4.8,
+    currentWorkload: 3,
+    preferredContactMethod: 'slack',
+  },
+  {
+    id: 'stakeholder-2',
+    name: 'Jamie Park',
+    email: 'jamie.park@company.com',
+    role: 'Senior Product Analyst',
+    function: 'analytics',
+    expertise: ['user behavior', 'metrics', 'experimentation'],
+    responseRate: 88,
+    avgResponseTime: 0.9,
+    qualityScore: 4.7,
+    currentWorkload: 5,
+    preferredContactMethod: 'email',
+  },
+  {
+    id: 'stakeholder-3',
+    name: 'Alex Rivera',
+    email: 'alex.rivera@company.com',
+    role: 'Lead Product Designer',
+    function: 'design',
+    expertise: ['UX research', 'mobile design', 'prototyping'],
+    responseRate: 79,
+    avgResponseTime: 1.5,
+    qualityScore: 4.6,
+    currentWorkload: 4,
+    preferredContactMethod: 'slack',
+  },
+  {
+    id: 'stakeholder-4',
+    name: 'Marcus Johnson',
+    email: 'marcus.johnson@company.com',
+    role: 'Security Engineer',
+    function: 'security',
+    expertise: ['application security', 'compliance', 'threat modeling'],
+    responseRate: 61,
+    avgResponseTime: 4.2,
+    qualityScore: 4.5,
+    currentWorkload: 8,
+    preferredContactMethod: 'email',
+  },
+  {
+    id: 'stakeholder-5',
+    name: 'Lisa Wang',
+    email: 'lisa.wang@company.com',
+    role: 'Legal Counsel',
+    function: 'legal',
+    expertise: ['privacy law', 'contracts', 'compliance'],
+    responseRate: 58,
+    avgResponseTime: 4.8,
+    qualityScore: 4.3,
+    currentWorkload: 6,
+    preferredContactMethod: 'email',
+  },
+  {
+    id: 'stakeholder-6',
+    name: 'Chris Martinez',
+    email: 'chris.martinez@company.com',
+    role: 'Product Marketing Manager',
+    function: 'marketing',
+    expertise: ['go-to-market', 'messaging', 'launch strategy'],
+    responseRate: 65,
+    avgResponseTime: 3.4,
+    qualityScore: 4.1,
+    currentWorkload: 7,
+    preferredContactMethod: 'slack',
+  },
 ];
+
+export function createDefaultSections(prdId: string): PRDSection[] {
+  return Object.entries(SECTION_TYPES).map(([type, info], index) => ({
+    id: `section-${prdId}-${type}`,
+    prdId,
+    name: info.name,
+    type: type as SectionType,
+    content: '',
+    status: 'not_started' as const,
+    completeness: 0,
+    assignedStakeholders: [],
+    lastUpdated: new Date().toISOString(),
+    dependencies: [],
+    blocks: [],
+    order: index,
+    icon: info.icon,
+  }));
+}
 
 export const mockPRDs: PRD[] = [
   {
-    id: '1',
-    title: 'User Authentication Redesign',
-    description: 'Modernize the authentication flow with SSO and biometric support',
-    status: 'in-progress',
-    priority: 'P0',
-    template: 'feature',
-    createdAt: '2024-01-15',
-    updatedAt: '2024-01-20',
-    dueDate: '2024-02-15',
-    owner: mockStakeholders[0],
-    progress: 65,
-    stakeholders: [mockStakeholders[0], mockStakeholders[1], mockStakeholders[3]],
-    sections: [
-      {
-        id: 's1',
-        prdId: '1',
-        title: 'Problem Statement',
-        description: 'Define the core problems with current authentication',
-        status: 'done',
-        completeness: 100,
-        assignedTo: [mockStakeholders[0]],
-        order: 0,
-        content: 'Current authentication is outdated and lacks modern security features.',
-      },
-      {
-        id: 's2',
-        prdId: '1',
-        title: 'Technical Approach',
-        description: 'Outline the technical implementation strategy',
-        status: 'in-progress',
-        completeness: 60,
-        assignedTo: [mockStakeholders[0]],
-        order: 1,
-        aiSuggestion: 'Consider implementing OAuth 2.0 with PKCE for enhanced security.',
-      },
-      {
-        id: 's3',
-        prdId: '1',
-        title: 'User Experience',
-        description: 'Design the user-facing authentication experience',
-        status: 'review',
-        completeness: 80,
-        assignedTo: [mockStakeholders[1]],
-        order: 2,
-      },
-      {
-        id: 's4',
-        prdId: '1',
-        title: 'Success Metrics',
-        description: 'Define KPIs and success criteria',
-        status: 'todo',
-        completeness: 0,
-        assignedTo: [mockStakeholders[2]],
-        order: 3,
-      },
-    ],
-  },
-  {
-    id: '2',
-    title: 'Mobile App Performance Optimization',
-    description: 'Improve app load times and reduce memory usage by 40%',
+    id: 'prd-1',
+    title: 'Promo Code Error Handling Enhancement',
+    description: 'Improve promo code validation and error messaging to reduce checkout abandonment',
     status: 'research',
-    priority: 'P1',
-    template: 'technical',
-    createdAt: '2024-01-18',
-    updatedAt: '2024-01-19',
-    dueDate: '2024-03-01',
-    owner: mockStakeholders[0],
-    progress: 20,
-    stakeholders: [mockStakeholders[0], mockStakeholders[3]],
-    sections: [
-      {
-        id: 's5',
-        prdId: '2',
-        title: 'Problem Statement',
-        description: 'Document current performance issues',
-        status: 'done',
-        completeness: 100,
-        assignedTo: [mockStakeholders[0]],
-        order: 0,
-      },
-      {
-        id: 's6',
-        prdId: '2',
-        title: 'Technical Approach',
-        description: 'Outline optimization strategies',
-        status: 'todo',
-        completeness: 0,
-        assignedTo: [mockStakeholders[0]],
-        order: 1,
-      },
-      {
-        id: 's7',
-        prdId: '2',
-        title: 'Testing Strategy',
-        description: 'Define performance testing approach',
-        status: 'todo',
-        completeness: 0,
-        assignedTo: [mockStakeholders[3]],
-        order: 2,
-      },
-    ],
-  },
-  {
-    id: '3',
-    title: 'Analytics Dashboard V2',
-    description: 'Build next-generation analytics with real-time insights',
-    status: 'review',
+    progress: 35,
+    owner: 'Alex Kim',
+    ownerId: 'user-1',
     priority: 'P0',
-    template: 'feature',
-    createdAt: '2024-01-10',
-    updatedAt: '2024-01-21',
-    dueDate: '2024-02-01',
-    owner: mockStakeholders[2],
-    progress: 85,
-    stakeholders: [mockStakeholders[1], mockStakeholders[2]],
-    sections: [
-      {
-        id: 's8',
-        prdId: '3',
-        title: 'Problem Statement',
-        description: 'Current analytics limitations',
-        status: 'done',
-        completeness: 100,
-        assignedTo: [mockStakeholders[2]],
-        order: 0,
-      },
-      {
-        id: 's9',
-        prdId: '3',
-        title: 'Data Requirements',
-        description: 'Define data sources and pipelines',
-        status: 'done',
-        completeness: 100,
-        assignedTo: [mockStakeholders[2]],
-        order: 1,
-      },
-      {
-        id: 's10',
-        prdId: '3',
-        title: 'UI/UX Design',
-        description: 'Dashboard visual design',
-        status: 'done',
-        completeness: 100,
-        assignedTo: [mockStakeholders[1]],
-        order: 2,
-      },
-      {
-        id: 's11',
-        prdId: '3',
-        title: 'Success Metrics',
-        description: 'KPIs for dashboard adoption',
-        status: 'review',
-        completeness: 70,
-        assignedTo: [mockStakeholders[4]],
-        order: 3,
-      },
-    ],
+    createdAt: '2026-01-01T10:00:00Z',
+    updatedAt: '2026-01-07T14:23:00Z',
+    targetDate: '2026-01-17T00:00:00Z',
+    template: 'enhancement',
+    sections: [],
+    tags: ['checkout', 'payments', 'mobile'],
+    daysInProgress: 7,
   },
   {
-    id: '4',
-    title: 'Customer Onboarding Flow',
-    description: 'Streamline customer onboarding with guided tutorials',
-    status: 'complete',
+    id: 'prd-2',
+    title: 'User Dashboard Redesign',
+    description: 'Modernize user dashboard with improved data visualization and personalization',
+    status: 'waiting',
+    progress: 62,
+    owner: 'Taylor Swift',
+    ownerId: 'user-2',
+    priority: 'P1',
+    createdAt: '2025-12-20T10:00:00Z',
+    updatedAt: '2026-01-06T09:15:00Z',
+    targetDate: '2026-02-01T00:00:00Z',
+    template: 'feature',
+    sections: [],
+    tags: ['dashboard', 'UX', 'analytics'],
+    daysInProgress: 18,
+  },
+  {
+    id: 'prd-3',
+    title: 'API Rate Limiting Infrastructure',
+    description: 'Implement distributed rate limiting to protect API endpoints',
+    status: 'review',
+    progress: 88,
+    owner: 'Morgan Lee',
+    ownerId: 'user-3',
+    priority: 'P1',
+    createdAt: '2025-12-10T10:00:00Z',
+    updatedAt: '2026-01-05T16:45:00Z',
+    targetDate: '2026-01-15T00:00:00Z',
+    template: 'technical',
+    sections: [],
+    tags: ['infrastructure', 'security', 'backend'],
+    daysInProgress: 28,
+  },
+  {
+    id: 'prd-4',
+    title: 'Mobile Push Notifications',
+    description: 'Implement push notification system for mobile app engagement',
+    status: 'backlog',
+    progress: 0,
+    owner: 'Alex Kim',
+    ownerId: 'user-1',
     priority: 'P2',
-    template: 'enhancement',
-    createdAt: '2024-01-01',
-    updatedAt: '2024-01-15',
-    owner: mockStakeholders[1],
-    progress: 100,
-    stakeholders: [mockStakeholders[1], mockStakeholders[2]],
-    sections: [
-      {
-        id: 's14',
-        prdId: '4',
-        title: 'Problem Statement',
-        description: 'Onboarding drop-off analysis',
-        status: 'done',
-        completeness: 100,
-        assignedTo: [mockStakeholders[2]],
-        order: 0,
-      },
-      {
-        id: 's15',
-        prdId: '4',
-        title: 'User Experience',
-        description: 'New onboarding flow design',
-        status: 'done',
-        completeness: 100,
-        assignedTo: [mockStakeholders[1]],
-        order: 1,
-      },
-      {
-        id: 's16',
-        prdId: '4',
-        title: 'Success Metrics',
-        description: 'Conversion improvement targets',
-        status: 'done',
-        completeness: 100,
-        assignedTo: [mockStakeholders[2]],
-        order: 2,
-      },
-    ],
+    createdAt: '2026-01-05T10:00:00Z',
+    updatedAt: '2026-01-05T10:00:00Z',
+    targetDate: '2026-03-01T00:00:00Z',
+    template: 'feature',
+    sections: [],
+    tags: ['mobile', 'engagement', 'notifications'],
+    daysInProgress: 2,
   },
 ];
 
+// Initialize sections for mock PRDs
+mockPRDs.forEach(prd => {
+  prd.sections = createDefaultSections(prd.id);
+  
+  // Add some sample content to first PRD
+  if (prd.id === 'prd-1') {
+    prd.sections[0].content = `## Problem Overview
+User telemetry indicates that 35% of checkout attempts involving promo codes result in abandonment (vs. 18% baseline). Analysis of 1,247 support tickets over the past quarter reveals three primary failure modes:
+
+1. **Invalid code entry** (48% of issues): Users apply expired or incorrect codes, receive generic error messages, and drop off rather than retry
+2. **Code stacking confusion** (31%): Users attempt to apply multiple codes simultaneously, unaware that codes are mutually exclusive
+3. **Mobile UX friction** (21%): Promo code field is hidden below fold on mobile
+
+## Business Impact
+- Estimated annual revenue loss: $2.3M
+- Support cost: ~$45K/year for promo code-related tickets
+- Brand perception: NPS drops 12 points for users who experience promo code failures`;
+    prd.sections[0].status = 'complete';
+    prd.sections[0].completeness = 95;
+    
+    prd.sections[2].content = `## Success Metrics
+- Reduce promo code abandonment from 35% to <20%
+- Decrease support tickets by 60%
+- Improve mobile promo code usage by 40%
+
+## KPIs
+- Error rate for promo codes
+- Time to apply promo code successfully
+- Mobile vs desktop promo code usage ratio`;
+    prd.sections[2].status = 'in_progress';
+    prd.sections[2].completeness = 70;
+    
+    prd.sections[3].assignedStakeholders = [
+      {
+        stakeholderId: 'stakeholder-1',
+        raciRole: 'responsible',
+        status: 'in_progress',
+        assignedAt: '2026-01-03T10:00:00Z',
+        expectedContribution: ['Technical feasibility', 'Architecture approach', 'Effort estimate'],
+        estimatedHours: 8,
+        daysAssigned: 4,
+      },
+      {
+        stakeholderId: 'stakeholder-4',
+        raciRole: 'consulted',
+        status: 'not_started',
+        assignedAt: '2026-01-05T14:00:00Z',
+        expectedContribution: ['Security review', 'Validation rules'],
+        estimatedHours: 3,
+        daysAssigned: 2,
+      },
+    ];
+  }
+});
+
+export function getStakeholderById(id: string): Stakeholder | undefined {
+  return mockStakeholders.find(s => s.id === id);
+}
+
+export function calculateSectionCompleteness(content: string): number {
+  if (!content || content.trim().length === 0) return 0;
+  const wordCount = content.split(/\s+/).length;
+  const targetWords = 200;
+  return Math.min(100, Math.round((wordCount / targetWords) * 100));
+}
+
+export function calculatePRDProgress(sections: PRDSection[]): number {
+  if (sections.length === 0) return 0;
+  const totalCompleteness = sections.reduce((sum, section) => sum + section.completeness, 0);
+  return Math.round(totalCompleteness / sections.length);
+}
+
 export const mockMetrics: DashboardMetrics = {
-  totalPRDs: 12,
-  inProgress: 5,
-  completed: 4,
-  blocked: 2,
-  averageCompletionTime: 14,
-  stakeholderResponseRate: 78,
+  prdsCreated: 12,
+  prdsCreatedChange: 15,
+  avgCycleTime: 14,
+  avgCycleTimeChange: -8,
+  pmTimeSaved: 42,
+  adoptionRate: 78,
+  agentPerformance: 92,
+  userSatisfaction: 4.5,
+  systemReliability: 99.8,
+  dataQuality: 94,
 };
