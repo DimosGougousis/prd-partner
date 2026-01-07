@@ -3,11 +3,30 @@ import MetricCard from '@/components/dashboard/MetricCard';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import PRDChart from '@/components/dashboard/PRDChart';
 import PRDCard from '@/components/prd/PRDCard';
-import { mockPRDs, mockMetrics } from '@/data/mockData';
-import { FileText, Clock, CheckCircle2, AlertCircle, TrendingUp, Users } from 'lucide-react';
+import { usePRDs } from '@/context/PRDContext';
+import { FileText, Clock, CheckCircle2, AlertCircle, TrendingUp, Users, Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
-  const recentPRDs = mockPRDs.slice(0, 3);
+  const { prds, isLoading } = usePRDs();
+
+  const metrics = {
+    totalPRDs: prds.length,
+    inProgress: prds.filter((p) => p.status === 'in-progress').length,
+    completed: prds.filter((p) => p.status === 'complete').length,
+    blocked: prds.filter((p) => p.status === 'research').length,
+  };
+
+  const recentPRDs = prds.slice(0, 3);
+
+  if (isLoading) {
+    return (
+      <Layout title="Dashboard" subtitle="Overview of your PRD portfolio">
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Dashboard" subtitle="Overview of your PRD portfolio">
@@ -16,27 +35,27 @@ const Dashboard = () => {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
             title="Total PRDs"
-            value={mockMetrics.totalPRDs}
+            value={metrics.totalPRDs}
             icon={<FileText className="h-5 w-5 text-primary" />}
             trend={{ value: 12, label: 'vs last month' }}
           />
           <MetricCard
             title="In Progress"
-            value={mockMetrics.inProgress}
-            icon={<Clock className="h-5 w-5 text-status-in-progress" />}
+            value={metrics.inProgress}
+            icon={<Clock className="h-5 w-5 text-amber-500" />}
             subtitle="Actively being worked on"
           />
           <MetricCard
             title="Completed"
-            value={mockMetrics.completed}
-            icon={<CheckCircle2 className="h-5 w-5 text-status-done" />}
+            value={metrics.completed}
+            icon={<CheckCircle2 className="h-5 w-5 text-green-500" />}
             trend={{ value: 8, label: 'vs last month' }}
           />
           <MetricCard
-            title="Blocked"
-            value={mockMetrics.blocked}
-            icon={<AlertCircle className="h-5 w-5 text-status-blocked" />}
-            trend={{ value: -25, label: 'vs last month' }}
+            title="In Research"
+            value={metrics.blocked}
+            icon={<AlertCircle className="h-5 w-5 text-blue-500" />}
+            subtitle="Gathering requirements"
           />
         </div>
 
@@ -44,14 +63,14 @@ const Dashboard = () => {
         <div className="grid gap-4 md:grid-cols-2">
           <MetricCard
             title="Avg. Completion Time"
-            value={`${mockMetrics.averageCompletionTime} days`}
+            value="14 days"
             icon={<TrendingUp className="h-5 w-5 text-accent-foreground" />}
-            subtitle="From draft to approved"
+            subtitle="From backlog to complete"
             trend={{ value: -15, label: 'improvement' }}
           />
           <MetricCard
             title="Stakeholder Response Rate"
-            value={`${mockMetrics.stakeholderResponseRate}%`}
+            value="78%"
             icon={<Users className="h-5 w-5 text-primary" />}
             subtitle="Within 24 hours"
             trend={{ value: 5, label: 'vs last month' }}

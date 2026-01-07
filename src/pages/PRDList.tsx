@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import PRDCard from '@/components/prd/PRDCard';
-import { mockPRDs } from '@/data/mockData';
+import { usePRDs } from '@/context/PRDContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,17 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Search, Filter, LayoutGrid, List } from 'lucide-react';
+import { Plus, Search, Filter, LayoutGrid, List, Loader2 } from 'lucide-react';
 import { PRDStatus, Priority } from '@/types/prd';
 import { cn } from '@/lib/utils';
+import CreatePRDModal from '@/components/prd/CreatePRDModal';
 
 const PRDList = () => {
+  const { prds, isLoading } = usePRDs();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<PRDStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  const filteredPRDs = mockPRDs.filter((prd) => {
+  const filteredPRDs = prds.filter((prd) => {
     const matchesSearch =
       prd.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prd.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -30,8 +33,18 @@ const PRDList = () => {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
+  if (isLoading) {
+    return (
+      <Layout title="PRDs" subtitle="Manage your Product Requirements Documents">
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </Layout>
+    );
+  }
+
   return (
-    <Layout title="PRDs" subtitle="Manage your Product Requirements Documents">
+    <Layout title="My PRDs" subtitle="Manage your Product Requirements Documents">
       <div className="space-y-6 animate-fade-in">
         {/* Toolbar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -52,11 +65,11 @@ const PRDList = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="backlog">Backlog</SelectItem>
+                <SelectItem value="research">Research</SelectItem>
                 <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="review">In Review</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="blocked">Blocked</SelectItem>
+                <SelectItem value="review">Review</SelectItem>
+                <SelectItem value="complete">Complete</SelectItem>
               </SelectContent>
             </Select>
 
@@ -66,9 +79,9 @@ const PRDList = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="P0">P0 - Critical</SelectItem>
+                <SelectItem value="P1">P1 - High</SelectItem>
+                <SelectItem value="P2">P2 - Medium</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -100,7 +113,7 @@ const PRDList = () => {
               </button>
             </div>
 
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => setCreateModalOpen(true)}>
               <Plus className="h-4 w-4" />
               New PRD
             </Button>
@@ -109,7 +122,7 @@ const PRDList = () => {
 
         {/* Results count */}
         <p className="text-sm text-muted-foreground">
-          Showing {filteredPRDs.length} of {mockPRDs.length} PRDs
+          Showing {filteredPRDs.length} of {prds.length} PRDs
         </p>
 
         {/* PRD Grid/List */}
@@ -138,6 +151,8 @@ const PRDList = () => {
           </div>
         )}
       </div>
+
+      <CreatePRDModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
     </Layout>
   );
 };
