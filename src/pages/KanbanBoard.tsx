@@ -17,7 +17,7 @@ interface Column {
 const columns: Column[] = [
   { id: 'backlog', title: 'Backlog', color: 'bg-muted-foreground' },
   { id: 'research', title: 'Research', color: 'bg-blue-500' },
-  { id: 'in-progress', title: 'In Progress', color: 'bg-amber-500' },
+  { id: 'waiting', title: 'Waiting', color: 'bg-amber-500' },
   { id: 'review', title: 'Review', color: 'bg-purple-500' },
   { id: 'complete', title: 'Complete', color: 'bg-green-500' },
 ];
@@ -49,10 +49,10 @@ const KanbanCard = ({ prd }: { prd: PRD }) => {
         <Progress value={prd.progress} className="h-1" />
 
         <div className="flex items-center justify-between">
-          {prd.dueDate && (
+          {prd.targetDate && (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <Calendar className="h-3 w-3" />
-              {new Date(prd.dueDate).toLocaleDateString('en-US', {
+              {new Date(prd.targetDate).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
               })}
@@ -61,7 +61,7 @@ const KanbanCard = ({ prd }: { prd: PRD }) => {
           
           <Avatar className="h-6 w-6">
             <AvatarFallback className="bg-accent text-[10px] font-medium text-accent-foreground">
-              {getInitials(prd.owner.name)}
+              {getInitials(prd.owner)}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -116,7 +116,7 @@ const KanbanBoard = () => {
 
   return (
     <Layout title="Kanban Board" subtitle="Visualize PRD workflow">
-      <div className="animate-fade-in">
+      <div className="animate-fade-in p-6">
         <div className="flex gap-4 overflow-x-auto pb-4">
           {columns.map((column) => (
             <KanbanColumn

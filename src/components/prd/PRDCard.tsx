@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import StatusBadge from './StatusBadge';
 import PriorityIndicator from './PriorityIndicator';
 import { Calendar, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { getStakeholderById } from '@/data/mockData';
 
 interface PRDCardProps {
   prd: PRD;
@@ -20,6 +20,11 @@ const PRDCard = ({ prd }: PRDCardProps) => {
       .join('')
       .toUpperCase();
   };
+
+  // Get stakeholder objects from IDs
+  const stakeholderObjects = (prd.stakeholders || [])
+    .map(id => getStakeholderById(id))
+    .filter((s): s is NonNullable<typeof s> => s !== undefined);
 
   return (
     <Link to={`/prd/${prd.id}`}>
@@ -52,10 +57,10 @@ const PRDCard = ({ prd }: PRDCardProps) => {
             <div className="flex items-center gap-4">
               <StatusBadge status={prd.status} size="sm" />
               
-              {prd.dueDate && (
+              {prd.targetDate && (
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Calendar className="h-3.5 w-3.5" />
-                  {new Date(prd.dueDate).toLocaleDateString('en-US', {
+                  {new Date(prd.targetDate).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                   })}
@@ -63,25 +68,32 @@ const PRDCard = ({ prd }: PRDCardProps) => {
               )}
             </div>
 
-            {/* Stakeholders */}
+            {/* Owner */}
             <div className="flex items-center gap-1">
-              <div className="flex -space-x-2">
-                {prd.stakeholders.slice(0, 3).map((stakeholder) => (
-                  <Avatar
-                    key={stakeholder.id}
-                    className="h-6 w-6 border-2 border-card"
-                  >
-                    <AvatarFallback className="bg-accent text-[10px] font-medium text-accent-foreground">
-                      {getInitials(stakeholder.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-                {prd.stakeholders.length > 3 && (
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-card bg-muted text-[10px] font-medium text-muted-foreground">
-                    +{prd.stakeholders.length - 3}
-                  </div>
-                )}
-              </div>
+              <Avatar className="h-6 w-6 border-2 border-card">
+                <AvatarFallback className="bg-accent text-[10px] font-medium text-accent-foreground">
+                  {getInitials(prd.owner)}
+                </AvatarFallback>
+              </Avatar>
+              {stakeholderObjects.length > 0 && (
+                <div className="flex -space-x-2 ml-1">
+                  {stakeholderObjects.slice(0, 2).map((stakeholder) => (
+                    <Avatar
+                      key={stakeholder.id}
+                      className="h-5 w-5 border-2 border-card"
+                    >
+                      <AvatarFallback className="bg-muted text-[8px] font-medium text-muted-foreground">
+                        {getInitials(stakeholder.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {stakeholderObjects.length > 2 && (
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-card bg-muted text-[8px] font-medium text-muted-foreground">
+                      +{stakeholderObjects.length - 2}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
