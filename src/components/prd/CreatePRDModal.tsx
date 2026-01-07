@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { usePRDs } from '@/context/PRDContext';
-import { Priority, PRDTemplate } from '@/types/prd';
+import { Priority, PRDTemplateKind } from '@/types/prd';
 import { Loader2 } from 'lucide-react';
 
 interface CreatePRDModalProps {
@@ -34,7 +34,7 @@ const CreatePRDModal = ({ open, onOpenChange }: CreatePRDModalProps) => {
     description: '',
     targetDate: '',
     priority: 'P1' as Priority,
-    template: 'feature' as PRDTemplate,
+    template: 'feature' as PRDTemplateKind,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,7 +136,7 @@ const CreatePRDModal = ({ open, onOpenChange }: CreatePRDModalProps) => {
             <Label htmlFor="template">PRD Template</Label>
             <Select
               value={formData.template}
-              onValueChange={(v) => setFormData({ ...formData, template: v as PRDTemplate })}
+              onValueChange={(v) => setFormData({ ...formData, template: v as PRDTemplateKind })}
             >
               <SelectTrigger id="template">
                 <SelectValue placeholder="Select template" />
