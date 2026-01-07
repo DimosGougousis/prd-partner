@@ -14,7 +14,7 @@ import {
 import { Plus, Search, Filter, LayoutGrid, List, Loader2 } from 'lucide-react';
 import { PRDStatus, Priority } from '@/types/prd';
 import { cn } from '@/lib/utils';
-import CreatePRDModal from '@/components/prd/CreatePRDModal';
+import PRDCreationFlow from '@/components/prd/PRDCreationFlow';
 
 const PRDList = () => {
   const { prds, isLoading } = usePRDs();
@@ -152,7 +152,7 @@ const PRDList = () => {
         )}
       </div>
 
-      <CreatePRDModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
+      <PRDCreationFlow open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
     </Layout>
   );
 };

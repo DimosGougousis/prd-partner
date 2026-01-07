@@ -8,7 +8,7 @@ export type StakeholderFunction = 'engineering' | 'design' | 'analytics' | 'mark
 export type StakeholderStatus = 'not_started' | 'assigned' | 'contacted' | 'in_progress' | 'completed';
 export type ConflictType = 'timeline' | 'technical' | 'resource' | 'assumption';
 export type AlertSeverity = 'critical' | 'medium' | 'info';
-export type PRDTemplate = 'feature' | 'enhancement' | 'technical';
+export type PRDTemplateKind = 'feature' | 'enhancement' | 'technical';
 
 export interface PRD {
   id: string;
@@ -22,7 +22,7 @@ export interface PRD {
   createdAt: string;
   updatedAt: string;
   targetDate: string;
-  template: PRDTemplate;
+  template: PRDTemplateKind;
   sections: PRDSection[];
   tags: string[];
   daysInProgress: number;
