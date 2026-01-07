@@ -14,26 +14,28 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <PRDProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/prds" element={<PRDList />} />
-            <Route path="/kanban" element={<KanbanBoard />} />
-            <Route path="/stakeholders" element={<Stakeholders />} />
-            <Route path="/insights" element={<AIInsights />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </PRDProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <PRDProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/prds" element={<PRDList />} />
+              <Route path="/kanban" element={<KanbanBoard />} />
+              <Route path="/stakeholders" element={<Stakeholders />} />
+              <Route path="/insights" element={<AIInsights />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </PRDProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
