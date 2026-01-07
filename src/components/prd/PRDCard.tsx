@@ -13,13 +13,17 @@ interface PRDCardProps {
 }
 
 const PRDCard = ({ prd }: PRDCardProps) => {
-  const getInitials = (name: string) => {
-    return name
+  const getInitials = (name: string | { name?: string } | undefined) => {
+    const nameStr = typeof name === 'string' ? name : (name?.name || 'U');
+    return nameStr
       .split(' ')
       .map((n) => n[0])
       .join('')
       .toUpperCase();
   };
+
+  // Handle owner being either string (new) or object (old localStorage data)
+  const ownerName = typeof prd.owner === 'string' ? prd.owner : ((prd.owner as any)?.name || 'Unknown');
 
   // Get stakeholder objects from IDs
   const stakeholderObjects = (prd.stakeholders || [])
@@ -72,7 +76,7 @@ const PRDCard = ({ prd }: PRDCardProps) => {
             <div className="flex items-center gap-1">
               <Avatar className="h-6 w-6 border-2 border-card">
                 <AvatarFallback className="bg-accent text-[10px] font-medium text-accent-foreground">
-                  {getInitials(prd.owner)}
+                  {getInitials(ownerName)}
                 </AvatarFallback>
               </Avatar>
               {stakeholderObjects.length > 0 && (

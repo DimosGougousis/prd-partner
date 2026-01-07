@@ -23,13 +23,17 @@ const columns: Column[] = [
 ];
 
 const KanbanCard = ({ prd }: { prd: PRD }) => {
-  const getInitials = (name: string) => {
-    return name
+  const getInitials = (name: string | { name?: string } | undefined) => {
+    const nameStr = typeof name === 'string' ? name : (name?.name || 'U');
+    return nameStr
       .split(' ')
       .map((n) => n[0])
       .join('')
       .toUpperCase();
   };
+
+  // Handle owner being either string (new) or object (old localStorage data)
+  const ownerName = typeof prd.owner === 'string' ? prd.owner : ((prd.owner as any)?.name || 'Unknown');
 
   return (
     <Card className="group cursor-grab border border-border bg-card p-4 transition-all hover:border-primary/20 hover:shadow-card-hover active:cursor-grabbing">
@@ -61,7 +65,7 @@ const KanbanCard = ({ prd }: { prd: PRD }) => {
           
           <Avatar className="h-6 w-6">
             <AvatarFallback className="bg-accent text-[10px] font-medium text-accent-foreground">
-              {getInitials(prd.owner)}
+              {getInitials(ownerName)}
             </AvatarFallback>
           </Avatar>
         </div>
