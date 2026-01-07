@@ -27,12 +27,12 @@ interface CreatePRDModalProps {
 }
 
 const CreatePRDModal = ({ open, onOpenChange }: CreatePRDModalProps) => {
-  const { addPRD, stakeholders } = usePRDs();
+  const { addPRD } = usePRDs();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    dueDate: '',
+    targetDate: '',
     priority: 'P1' as Priority,
     template: 'feature' as PRDTemplate,
   });
@@ -49,18 +49,21 @@ const CreatePRDModal = ({ open, onOpenChange }: CreatePRDModalProps) => {
     addPRD({
       title: formData.title.trim(),
       description: formData.description.trim(),
-      dueDate: formData.dueDate || undefined,
+      targetDate: formData.targetDate || new Date().toISOString(),
       priority: formData.priority,
       template: formData.template,
       status: 'backlog',
       progress: 0,
-      owner: stakeholders[0],
+      owner: 'Current User',
+      ownerId: 'user-current',
+      tags: [],
+      daysInProgress: 0,
     });
 
     setFormData({
       title: '',
       description: '',
-      dueDate: '',
+      targetDate: '',
       priority: 'P1',
       template: 'feature',
     });
@@ -102,12 +105,12 @@ const CreatePRDModal = ({ open, onOpenChange }: CreatePRDModalProps) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="dueDate">Target Completion Date</Label>
+              <Label htmlFor="targetDate">Target Completion Date</Label>
               <Input
-                id="dueDate"
+                id="targetDate"
                 type="date"
-                value={formData.dueDate}
-                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                value={formData.targetDate}
+                onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })}
               />
             </div>
 

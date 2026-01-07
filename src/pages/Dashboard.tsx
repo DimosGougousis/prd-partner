@@ -11,9 +11,9 @@ const Dashboard = () => {
 
   const metrics = {
     totalPRDs: prds.length,
-    inProgress: prds.filter((p) => p.status === 'in-progress').length,
+    inProgress: prds.filter((p) => p.status === 'waiting' || p.status === 'research').length,
     completed: prds.filter((p) => p.status === 'complete').length,
-    blocked: prds.filter((p) => p.status === 'research').length,
+    inReview: prds.filter((p) => p.status === 'review').length,
   };
 
   const recentPRDs = prds.slice(0, 3);
@@ -30,7 +30,7 @@ const Dashboard = () => {
 
   return (
     <Layout title="Dashboard" subtitle="Overview of your PRD portfolio">
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in p-6">
         {/* Metrics Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
@@ -52,10 +52,10 @@ const Dashboard = () => {
             trend={{ value: 8, label: 'vs last month' }}
           />
           <MetricCard
-            title="In Research"
-            value={metrics.blocked}
-            icon={<AlertCircle className="h-5 w-5 text-blue-500" />}
-            subtitle="Gathering requirements"
+            title="In Review"
+            value={metrics.inReview}
+            icon={<AlertCircle className="h-5 w-5 text-purple-500" />}
+            subtitle="Awaiting approval"
           />
         </div>
 

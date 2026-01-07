@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { PRD, Stakeholder } from '@/types/prd';
-import { mockPRDs, mockStakeholders } from '@/data/mockData';
+import { mockPRDs, mockStakeholders, createDefaultSections } from '@/data/mockData';
 
 interface PRDContextType {
   prds: PRD[];
   stakeholders: Stakeholder[];
-  addPRD: (prd: Omit<PRD, 'id' | 'createdAt' | 'updatedAt' | 'sections' | 'stakeholders'>) => void;
+  addPRD: (prd: Omit<PRD, 'id' | 'createdAt' | 'updatedAt' | 'sections'>) => void;
   updatePRD: (id: string, updates: Partial<PRD>) => void;
   deletePRD: (id: string) => void;
   isLoading: boolean;
@@ -42,14 +42,14 @@ export const PRDProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [prds, isLoading]);
 
-  const addPRD = (prdData: Omit<PRD, 'id' | 'createdAt' | 'updatedAt' | 'sections' | 'stakeholders'>) => {
+  const addPRD = (prdData: Omit<PRD, 'id' | 'createdAt' | 'updatedAt' | 'sections'>) => {
+    const id = crypto.randomUUID();
     const newPRD: PRD = {
       ...prdData,
-      id: crypto.randomUUID(),
+      id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      sections: [],
-      stakeholders: [prdData.owner],
+      sections: createDefaultSections(id),
     };
     setPRDs((prev) => [newPRD, ...prev]);
   };
