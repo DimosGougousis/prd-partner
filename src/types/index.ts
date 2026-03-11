@@ -1,6 +1,6 @@
 // Core Type Definitions for AI PM Agent
 
-export type PRDStatus = 'backlog' | 'research' | 'waiting' | 'review' | 'complete' | 'archived';
+export type PRDStatus = 'backlog' | 'research' | 'waiting' | 'review' | 'complete';
 export type SectionStatus = 'not_started' | 'in_progress' | 'review' | 'complete';
 export type Priority = 'P0' | 'P1' | 'P2';
 export type RACIRole = 'responsible' | 'accountable' | 'consulted' | 'informed';
@@ -8,7 +8,6 @@ export type StakeholderFunction = 'engineering' | 'design' | 'analytics' | 'mark
 export type StakeholderStatus = 'not_started' | 'assigned' | 'contacted' | 'in_progress' | 'completed';
 export type ConflictType = 'timeline' | 'technical' | 'resource' | 'assumption';
 export type AlertSeverity = 'critical' | 'medium' | 'info';
-export type PRDTemplateKind = 'feature' | 'enhancement' | 'technical';
 
 export interface PRD {
   id: string;
@@ -22,21 +21,10 @@ export interface PRD {
   createdAt: string;
   updatedAt: string;
   targetDate: string;
-  template: PRDTemplateKind;
+  template: 'feature' | 'enhancement' | 'technical';
   sections: PRDSection[];
   tags: string[];
   daysInProgress: number;
-  stakeholders?: string[];
-  jiraIssueKey?: string;
-  jiraIssueUrl?: string;
-}
-
-export interface SectionIntegrationLinks {
-  jira?: string;
-  slack?: string;
-  github?: string;
-  googleDrive?: string;
-  confluence?: string;
 }
 
 export interface PRDSection {
@@ -53,7 +41,6 @@ export interface PRDSection {
   blocks: string[];
   order: number;
   icon: string;
-  integrationLinks?: SectionIntegrationLinks;
 }
 
 export type SectionType = 

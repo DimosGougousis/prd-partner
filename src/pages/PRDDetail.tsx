@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Flag, TrendingUp, Trash2, Archive, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Flag, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -11,66 +11,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { PRD, PRDStatus, PRDSection, Priority } from '@/types/prd';
-import { usePRDs } from '@/context/PRDContext';
-import { calculatePRDProgress } from '@/data/mockData';
-import SectionCard from '@/components/prd/SectionCard';
-import Layout from '@/components/layout/Layout';
-import { JiraLink } from '@/components/integrations/JiraLink';
+import { PRD, PRDStatus } from '@/types';
+import { mockPRDs, calculatePRDProgress } from '@/data/mockData';
+import SectionCard from '@/components/SectionCard';
+import Layout from '@/components/Layout';
 
 export default function PRDDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { prds, updatePRD, deletePRD } = usePRDs();
   const [prd, setPRD] = useState<PRD | null>(null);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
 
   useEffect(() => {
-    const foundPRD = prds.find((p) => p.id === id);
+    // In real app, fetch from API/context
+    const foundPRD = mockPRDs.find((p) => p.id === id);
     if (foundPRD) {
       setPRD(foundPRD);
     }
-  }, [id, prds]);
+  }, [id]);
 
   const handleStatusChange = (newStatus: PRDStatus) => {
     if (prd) {
-      updatePRD(prd.id, { status: newStatus });
       setPRD({ ...prd, status: newStatus });
+      // Update in context/API
     }
   };
 
-  const handlePriorityChange = (newPriority: Priority) => {
-    if (prd) {
-      updatePRD(prd.id, { priority: newPriority });
-      setPRD({ ...prd, priority: newPriority });
-    }
-  };
-
-  const handleDelete = () => {
-    if (prd) {
-      deletePRD(prd.id);
-      navigate('/prds');
-    }
-  };
-
-  const handleArchive = () => {
-    if (prd) {
-      updatePRD(prd.id, { status: 'archived' });
-      setPRD({ ...prd, status: 'archived' });
-      setShowArchiveDialog(false);
-    }
-  };
-
-  const handleSectionUpdate = (sectionId: string, updates: Partial<PRDSection>) => {
+  const handleSectionUpdate = (sectionId: string, updates: Partial<PRD['sections'][0]>) => {
     if (!prd) return;
     
     const updatedSections = prd.sections.map((section) =>
@@ -84,7 +50,6 @@ export default function PRDDetail() {
       updatedAt: new Date().toISOString(),
     };
     
-    updatePRD(prd.id, { sections: updatedSections, progress: updatedPRD.progress });
     setPRD(updatedPRD);
   };
 
@@ -102,12 +67,11 @@ export default function PRDDetail() {
   }
 
   const statusColors: Record<PRDStatus, string> = {
-    backlog: 'bg-muted text-muted-foreground',
-    research: 'bg-blue-500 text-white',
-    waiting: 'bg-yellow-500 text-white',
-    review: 'bg-purple-500 text-white',
-    complete: 'bg-green-500 text-white',
-    archived: 'bg-gray-500 text-white',
+    backlog: 'bg-gray-500',
+    research: 'bg-blue-500',
+    waiting: 'bg-yellow-500',
+    review: 'bg-purple-500',
+    complete: 'bg-green-500',
   };
 
   const priorityColors = {
@@ -133,87 +97,49 @@ export default function PRDDetail() {
             Back to PRDs
           </Button>
 
-          <div className="bg-card rounded-lg shadow-sm border p-6">
+          <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <h1 className="text-3xl font-bold mb-2">{prd.title}</h1>
-                <p className="text-muted-foreground">{prd.description}</p>
+                <p className="text-gray-600">{prd.description}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Select value={prd.priority} onValueChange={handlePriorityChange}>
-                  <SelectTrigger className="w-24">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="P0">P0</SelectItem>
-                    <SelectItem value="P1">P1</SelectItem>
-                    <SelectItem value="P2">P2</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setShowArchiveDialog(true)}
-                  title="Archive PRD"
-                >
-                  <Archive className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setShowDeleteDialog(true)}
-                  title="Delete PRD"
-                  className="text-red-500 hover:text-red-600"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+              <Badge className={priorityColors[prd.priority]}>
+                {prd.priority}
+              </Badge>
             </div>
 
             {/* Metrics Bar */}
-            <div className="grid grid-cols-5 gap-4 mb-4">
+            <div className="grid grid-cols-4 gap-4 mb-4">
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-muted-foreground" />
+                <User className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Owner</p>
+                  <p className="text-xs text-gray-500">Owner</p>
                   <p className="font-medium">{prd.owner}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <Calendar className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Target Date</p>
+                  <p className="text-xs text-gray-500">Target Date</p>
                   <p className="font-medium">
                     {new Date(prd.targetDate).toLocaleDateString()}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                <TrendingUp className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Progress</p>
+                  <p className="text-xs text-gray-500">Progress</p>
                   <p className="font-medium">{prd.daysInProgress} days</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Flag className="w-4 h-4 text-muted-foreground" />
+                <Flag className="w-4 h-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Sections</p>
+                  <p className="text-xs text-gray-500">Sections</p>
                   <p className="font-medium">
                     {completedSections}/{totalSections}
                   </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Jira Issue</p>
-                  <JiraLink
-                    prdId={prd.id}
-                    jiraIssueKey={prd.jiraIssueKey}
-                    jiraIssueUrl={prd.jiraIssueUrl}
-                    onLink={(key, url) => updatePRD(prd.id, { jiraIssueKey: key, jiraIssueUrl: url })}
-                    onUnlink={() => updatePRD(prd.id, { jiraIssueKey: undefined, jiraIssueUrl: undefined })}
-                  />
                 </div>
               </div>
             </div>
@@ -237,7 +163,6 @@ export default function PRDDetail() {
                   <SelectItem value="waiting">Waiting</SelectItem>
                   <SelectItem value="review">Review</SelectItem>
                   <SelectItem value="complete">Complete</SelectItem>
-                  <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -258,52 +183,6 @@ export default function PRDDetail() {
               />
             ))}
         </div>
-
-        {/* Delete Confirmation Dialog */}
-        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-500" />
-                Delete PRD
-              </DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete "{prd.title}"? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleDelete}>
-                Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Archive Confirmation Dialog */}
-        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Archive className="w-5 h-5 text-blue-500" />
-                Archive PRD
-              </DialogTitle>
-              <DialogDescription>
-                Are you sure you want to archive "{prd.title}"? Archived PRDs can be restored later.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleArchive}>
-                Archive
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </Layout>
   );

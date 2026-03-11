@@ -1,6 +1,6 @@
 // Mock data utilities for development
 
-import { PRD, PRDSection, Stakeholder, SectionType, DashboardMetrics } from '@/types/prd';
+import { PRD, PRDSection, Stakeholder, SectionType } from '../types';
 
 export const SECTION_TYPES: Record<SectionType, { name: string; icon: string; description: string }> = {
   problem_statement: {
@@ -126,163 +126,22 @@ export const mockStakeholders: Stakeholder[] = [
   },
 ];
 
-// Default stakeholder assignments by section type
-export const DEFAULT_STAKEHOLDER_ASSIGNMENTS: Record<SectionType, Array<{
-  stakeholderId: string;
-  raciRole: 'responsible' | 'accountable' | 'consulted' | 'informed';
-  expectedContribution: string[];
-  estimatedHours: number;
-}>> = {
-  problem_statement: [
-    {
-      stakeholderId: 'stakeholder-2', // Jamie Park - Product Analyst
-      raciRole: 'responsible',
-      expectedContribution: ['Problem analysis', 'User research data', 'Pain point documentation'],
-      estimatedHours: 6,
-    },
-    {
-      stakeholderId: 'stakeholder-1', // Sarah Chen - Engineering Lead
-      raciRole: 'consulted',
-      expectedContribution: ['Technical feasibility input', 'Current system context'],
-      estimatedHours: 2,
-    },
-  ],
-  user_stories: [
-    {
-      stakeholderId: 'stakeholder-3', // Alex Rivera - Product Designer
-      raciRole: 'responsible',
-      expectedContribution: ['User story creation', 'UX requirements', 'User flow diagrams'],
-      estimatedHours: 8,
-    },
-    {
-      stakeholderId: 'stakeholder-2', // Jamie Park - Product Analyst
-      raciRole: 'consulted',
-      expectedContribution: ['User research insights', 'Persona validation'],
-      estimatedHours: 3,
-    },
-  ],
-  success_metrics: [
-    {
-      stakeholderId: 'stakeholder-2', // Jamie Park - Product Analyst
-      raciRole: 'responsible',
-      expectedContribution: ['Metric definition', 'Baseline measurement', 'Target setting'],
-      estimatedHours: 5,
-    },
-    {
-      stakeholderId: 'stakeholder-6', // Chris Martinez - Product Marketing
-      raciRole: 'consulted',
-      expectedContribution: ['Business impact metrics', 'Go-to-market metrics'],
-      estimatedHours: 2,
-    },
-  ],
-  technical_approach: [
-    {
-      stakeholderId: 'stakeholder-1', // Sarah Chen - Engineering Lead
-      raciRole: 'responsible',
-      expectedContribution: ['Architecture design', 'Technical approach', 'Implementation plan'],
-      estimatedHours: 10,
-    },
-    {
-      stakeholderId: 'stakeholder-4', // Marcus Johnson - Security Engineer
-      raciRole: 'consulted',
-      expectedContribution: ['Security review', 'Technical constraints'],
-      estimatedHours: 4,
-    },
-    {
-      stakeholderId: 'stakeholder-5', // Lisa Wang - Legal Counsel
-      raciRole: 'informed',
-      expectedContribution: ['Compliance considerations'],
-      estimatedHours: 1,
-    },
-  ],
-  dependencies_risks: [
-    {
-      stakeholderId: 'stakeholder-1', // Sarah Chen - Engineering Lead
-      raciRole: 'responsible',
-      expectedContribution: ['Technical dependencies', 'Risk assessment'],
-      estimatedHours: 4,
-    },
-    {
-      stakeholderId: 'stakeholder-4', // Marcus Johnson - Security Engineer
-      raciRole: 'consulted',
-      expectedContribution: ['Security risks', 'Compliance risks'],
-      estimatedHours: 2,
-    },
-  ],
-  go_to_market: [
-    {
-      stakeholderId: 'stakeholder-6', // Chris Martinez - Product Marketing
-      raciRole: 'responsible',
-      expectedContribution: ['Launch strategy', 'Marketing plan', 'Communication plan'],
-      estimatedHours: 6,
-    },
-    {
-      stakeholderId: 'stakeholder-3', // Alex Rivera - Product Designer
-      raciRole: 'consulted',
-      expectedContribution: ['UX copy', 'Design assets'],
-      estimatedHours: 3,
-    },
-  ],
-  resource_estimation: [
-    {
-      stakeholderId: 'stakeholder-1', // Sarah Chen - Engineering Lead
-      raciRole: 'responsible',
-      expectedContribution: ['Engineering effort', 'Resource planning'],
-      estimatedHours: 3,
-    },
-    {
-      stakeholderId: 'stakeholder-3', // Alex Rivera - Product Designer
-      raciRole: 'consulted',
-      expectedContribution: ['Design effort estimate'],
-      estimatedHours: 2,
-    },
-  ],
-  legal_compliance: [
-    {
-      stakeholderId: 'stakeholder-5', // Lisa Wang - Legal Counsel
-      raciRole: 'responsible',
-      expectedContribution: ['Legal review', 'Compliance requirements', 'Privacy assessment'],
-      estimatedHours: 4,
-    },
-    {
-      stakeholderId: 'stakeholder-4', // Marcus Johnson - Security Engineer
-      raciRole: 'consulted',
-      expectedContribution: ['Security compliance', 'Data handling review'],
-      estimatedHours: 2,
-    },
-  ],
-};
-
 export function createDefaultSections(prdId: string): PRDSection[] {
-  return Object.entries(SECTION_TYPES).map(([type, info], index) => {
-    const sectionType = type as SectionType;
-    const defaultAssignments = DEFAULT_STAKEHOLDER_ASSIGNMENTS[sectionType] || [];
-    
-    return {
-      id: `section-${prdId}-${type}`,
-      prdId,
-      name: info.name,
-      type: sectionType,
-      content: '',
-      status: 'not_started' as const,
-      completeness: 0,
-      assignedStakeholders: defaultAssignments.map(assignment => ({
-        stakeholderId: assignment.stakeholderId,
-        raciRole: assignment.raciRole,
-        status: 'not_started' as const,
-        assignedAt: new Date().toISOString(),
-        expectedContribution: assignment.expectedContribution,
-        estimatedHours: assignment.estimatedHours,
-        daysAssigned: 0,
-      })),
-      lastUpdated: new Date().toISOString(),
-      dependencies: [],
-      blocks: [],
-      order: index,
-      icon: info.icon,
-      integrationLinks: {},
-    };
-  });
+  return Object.entries(SECTION_TYPES).map(([type, info], index) => ({
+    id: `section-${prdId}-${type}`,
+    prdId,
+    name: info.name,
+    type: type as SectionType,
+    content: '',
+    status: 'not_started',
+    completeness: 0,
+    assignedStakeholders: [],
+    lastUpdated: new Date().toISOString(),
+    dependencies: [],
+    blocks: [],
+    order: index,
+    icon: info.icon,
+  }));
 }
 
 export const mockPRDs: PRD[] = [
@@ -336,23 +195,6 @@ export const mockPRDs: PRD[] = [
     sections: [],
     tags: ['infrastructure', 'security', 'backend'],
     daysInProgress: 28,
-  },
-  {
-    id: 'prd-4',
-    title: 'Mobile Push Notifications',
-    description: 'Implement push notification system for mobile app engagement',
-    status: 'backlog',
-    progress: 0,
-    owner: 'Alex Kim',
-    ownerId: 'user-1',
-    priority: 'P2',
-    createdAt: '2026-01-05T10:00:00Z',
-    updatedAt: '2026-01-05T10:00:00Z',
-    targetDate: '2026-03-01T00:00:00Z',
-    template: 'feature',
-    sections: [],
-    tags: ['mobile', 'engagement', 'notifications'],
-    daysInProgress: 2,
   },
 ];
 
@@ -427,16 +269,3 @@ export function calculatePRDProgress(sections: PRDSection[]): number {
   const totalCompleteness = sections.reduce((sum, section) => sum + section.completeness, 0);
   return Math.round(totalCompleteness / sections.length);
 }
-
-export const mockMetrics: DashboardMetrics = {
-  prdsCreated: 12,
-  prdsCreatedChange: 15,
-  avgCycleTime: 14,
-  avgCycleTimeChange: -8,
-  pmTimeSaved: 42,
-  adoptionRate: 78,
-  agentPerformance: 92,
-  userSatisfaction: 4.5,
-  systemReliability: 99.8,
-  dataQuality: 94,
-};
