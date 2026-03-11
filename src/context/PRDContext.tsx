@@ -13,7 +13,10 @@ interface PRDContextType {
 
 const PRDContext = createContext<PRDContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'prd-agent-data';
+const STORAGE_KEY = 'prd-agent-data-v2';
+
+// Helper to check if we're in browser
+const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 
 export const PRDProvider = ({ children }: { children: ReactNode }) => {
   const [prds, setPRDs] = useState<PRD[]>([]);
@@ -22,17 +25,44 @@ export const PRDProvider = ({ children }: { children: ReactNode }) => {
 
   // Load from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setPRDs(JSON.parse(stored));
-      } catch {
+    console.log("PRDContext: Loading data...");
+    
+    if (!isBrowser) {
+      console.log("PRDContext: Not in browser, using mock data");
+      setPRDs(mockPRDs);
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        console.log("PRDContext: Found stored data, length:", stored.length);
+        const parsed = JSON.parse(stored);
+        console.log("PRDContext: Parsed data type:", typeof parsed, Array.isArray(parsed));
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          console.log("PRDContext: Using stored data, count:", parsed.length);
+          setPRDs(parsed);
+        } else {
+          console.log("PRDContext: Parsed data is empty or not an array, using mock data");
+          setPRDs(mockPRDs);
+        }
+      } else {
+        console.log("PRDContext: No stored data, using mock data");
         setPRDs(mockPRDs);
       }
-    } else {
+    } catch (error) {
+      console.error("PRDContext: Error loading from localStorage:", error);
+      // Clear corrupted data
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        console.error("PRDContext: Could not clear localStorage:", e);
+      }
       setPRDs(mockPRDs);
     }
     setIsLoading(false);
+    console.log("PRDContext: Loading complete");
   }, []);
 
   // Save to localStorage on change

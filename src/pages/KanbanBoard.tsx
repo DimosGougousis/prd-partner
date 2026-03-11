@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { usePRDs } from '@/context/PRDContext';
 import { PRD, PRDStatus } from '@/types/prd';
@@ -36,41 +37,43 @@ const KanbanCard = ({ prd }: { prd: PRD }) => {
   const ownerName = typeof prd.owner === 'string' ? prd.owner : ((prd.owner as any)?.name || 'Unknown');
 
   return (
-    <Card className="group cursor-grab border border-border bg-card p-4 transition-all hover:border-primary/20 hover:shadow-card-hover active:cursor-grabbing">
-      <div className="space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-2">
-            <GripVertical className="mt-0.5 h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-            <div className="min-w-0 flex-1">
-              <h4 className="text-sm font-medium text-foreground line-clamp-2">
-                {prd.title}
-              </h4>
+    <Link to={`/prd/${prd.id}`}>
+      <Card className="group cursor-grab border border-border bg-card p-4 transition-all hover:border-primary/20 hover:shadow-card-hover active:cursor-grabbing">
+        <div className="space-y-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-2">
+              <GripVertical className="mt-0.5 h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="min-w-0 flex-1">
+                <h4 className="text-sm font-medium text-foreground line-clamp-2 hover:text-primary">
+                  {prd.title}
+                </h4>
+              </div>
             </div>
+            <PriorityIndicator priority={prd.priority} />
           </div>
-          <PriorityIndicator priority={prd.priority} />
-        </div>
 
-        <Progress value={prd.progress} className="h-1" />
+          <Progress value={prd.progress} className="h-1" />
 
-        <div className="flex items-center justify-between">
-          {prd.targetDate && (
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Calendar className="h-3 w-3" />
-              {new Date(prd.targetDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              })}
-            </span>
-          )}
-          
-          <Avatar className="h-6 w-6">
-            <AvatarFallback className="bg-accent text-[10px] font-medium text-accent-foreground">
-              {getInitials(ownerName)}
-            </AvatarFallback>
-          </Avatar>
+          <div className="flex items-center justify-between">
+            {prd.targetDate && (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                {new Date(prd.targetDate).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </span>
+            )}
+            
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className="bg-accent text-[10px] font-medium text-accent-foreground">
+                {getInitials(ownerName)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </Link>
   );
 };
 

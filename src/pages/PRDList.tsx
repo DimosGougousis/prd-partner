@@ -85,15 +85,6 @@ const PRDList = () => {
     setShowBulkPriorityDialog(false);
   };
 
-  const filteredPRDs = prds.filter((prd) => {
-    const matchesSearch =
-      prd.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      prd.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || prd.status === statusFilter;
-    const matchesPriority = priorityFilter === 'all' || prd.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
-
   if (isLoading) {
     return (
       <Layout title="PRDs" subtitle="Manage your Product Requirements Documents">

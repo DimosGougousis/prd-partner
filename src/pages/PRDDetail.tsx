@@ -24,6 +24,7 @@ import { usePRDs } from '@/context/PRDContext';
 import { calculatePRDProgress } from '@/data/mockData';
 import SectionCard from '@/components/prd/SectionCard';
 import Layout from '@/components/layout/Layout';
+import { JiraLink } from '@/components/integrations/JiraLink';
 
 export default function PRDDetail() {
   const { id } = useParams<{ id: string }>();
@@ -170,7 +171,7 @@ export default function PRDDetail() {
             </div>
 
             {/* Metrics Bar */}
-            <div className="grid grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-5 gap-4 mb-4">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-muted-foreground" />
                 <div>
@@ -201,6 +202,18 @@ export default function PRDDetail() {
                   <p className="font-medium">
                     {completedSections}/{totalSections}
                   </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Jira Issue</p>
+                  <JiraLink
+                    prdId={prd.id}
+                    jiraIssueKey={prd.jiraIssueKey}
+                    jiraIssueUrl={prd.jiraIssueUrl}
+                    onLink={(key, url) => updatePRD(prd.id, { jiraIssueKey: key, jiraIssueUrl: url })}
+                    onUnlink={() => updatePRD(prd.id, { jiraIssueKey: undefined, jiraIssueUrl: undefined })}
+                  />
                 </div>
               </div>
             </div>

@@ -27,6 +27,8 @@ export interface PRD {
   tags: string[];
   daysInProgress: number;
   stakeholders?: string[];
+  jiraIssueKey?: string;
+  jiraIssueUrl?: string;
 }
 
 export interface PRDSection {

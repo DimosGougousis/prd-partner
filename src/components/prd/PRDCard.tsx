@@ -115,7 +115,6 @@ const PRDCard = ({ prd, selected, onSelect }: PRDCardProps) => {
           </div>
         </div>
       </Card>
-    </Link>
   );
 };
 
