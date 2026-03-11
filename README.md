@@ -1,33 +1,100 @@
-# Welcome to your Lovable project
+# PRD Kanban
 
-## Project info
+AI-powered Product Requirements Document management with Kanban workflow.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Project Overview
 
-## How can I edit this code?
+PRD Kanban is a comprehensive tool for Product Managers to create, track, and manage Product Requirements Documents with AI-assisted workflows, stakeholder collaboration, and visual Kanban boards.
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- **PRD Creation**: Template-based PRD creation with guided wizard
+- **Kanban Board**: Visual workflow management with drag-and-drop
+- **Stakeholder Management**: RACI matrices and intelligent assignments
+- **AI Insights**: Bottleneck detection and recommendations
+- **Conflict Resolution**: Timeline and resource conflict detection
+- **Dashboard & Reporting**: Real-time metrics and executive summaries
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS + shadcn/ui
+- React Router
+- TanStack Query
+- @dnd-kit (drag and drop)
 
-**Use your preferred IDE**
+## Getting Started
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Node.js 18+
+- npm or bun
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+```bash
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to the project directory
+cd prd-kanban
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+The application will be available at http://localhost:8080/
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run preview` - Preview production build
+
+## Project Structure
+
+```
+src/
+├── components/     # React components
+│   ├── prd/       # PRD-specific components
+│   ├── ui/        # shadcn/ui components
+│   └── layout/    # Layout components
+├── pages/         # Route pages
+├── context/       # React context
+├── data/          # Mock data and utilities
+├── types/         # TypeScript types
+└── hooks/         # Custom hooks
+```
+
+## AI Agents
+
+The project includes 7 specialized agents:
+
+1. **PRD Creation Agent** - Template-based PRD creation
+2. **Stakeholder Intelligence Agent** - RACI matrices and assignments
+3. **AI Insights Agent** - Bottleneck detection and recommendations
+4. **Workflow Automation Agent** - Kanban and progress tracking
+5. **Conflict Resolution Agent** - Timeline and resource conflicts
+6. **Content & Documentation Agent** - Rich text editing and search
+7. **Dashboard & Reporting Agent** - Metrics and reporting
+
+See `.agents/` directory for agent configurations.
+
+## Contributing
+
+1. Create a feature branch
+2. Make your changes
+3. Run tests and linting
+4. Submit a pull request
+
+## License
+
+MIT
 
 # Step 3: Install the necessary dependencies.
 npm i
