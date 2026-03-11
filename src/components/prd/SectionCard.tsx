@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Clock, Users, CheckCircle2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Clock, Users, CheckCircle2, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -13,6 +13,7 @@ import {
 import { PRDSection, SectionStatus } from '@/types/prd';
 import { getStakeholderById } from '@/data/mockData';
 import RichTextEditor from './RichTextEditor';
+import { SectionIntegrationLinks } from '@/components/integrations/SectionIntegrationLinks';
 
 interface SectionCardProps {
   section: PRDSection;
@@ -166,20 +167,31 @@ export default function SectionCard({ section, prdTitle, onUpdate }: SectionCard
             </div>
           )}
 
-          {/* Metadata */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              <span>
-                Last updated {new Date(section.lastUpdated).toLocaleDateString()}
-              </span>
-            </div>
-            {section.status === 'complete' && (
-              <div className="flex items-center gap-1 text-green-600">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Section complete</span>
+          {/* Metadata & Integration Links */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                <span>
+                  Last updated {new Date(section.lastUpdated).toLocaleDateString()}
+                </span>
               </div>
-            )}
+              {section.status === 'complete' && (
+                <div className="flex items-center gap-1 text-green-600">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Section complete</span>
+                </div>
+              )}
+            </div>
+
+            {/* Integration Links */}
+            <div className="flex items-center gap-2">
+              <Link2 className="w-4 h-4 text-muted-foreground" />
+              <SectionIntegrationLinks
+                links={section.integrationLinks}
+                onUpdate={(links) => onUpdate(section.id, { integrationLinks: links })}
+              />
+            </div>
           </div>
 
           {/* Rich Text Editor */}

@@ -31,6 +31,14 @@ export interface PRD {
   jiraIssueUrl?: string;
 }
 
+export interface SectionIntegrationLinks {
+  jira?: string;
+  slack?: string;
+  github?: string;
+  googleDrive?: string;
+  confluence?: string;
+}
+
 export interface PRDSection {
   id: string;
   prdId: string;
@@ -45,6 +53,7 @@ export interface PRDSection {
   blocks: string[];
   order: number;
   icon: string;
+  integrationLinks?: SectionIntegrationLinks;
 }
 
 export type SectionType = 

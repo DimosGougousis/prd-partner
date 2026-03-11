@@ -280,6 +280,7 @@ export function createDefaultSections(prdId: string): PRDSection[] {
       blocks: [],
       order: index,
       icon: info.icon,
+      integrationLinks: {},
     };
   });
 }
