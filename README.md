@@ -141,3 +141,4 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/c
 
 
 Rebuild and redeploy
+# Deployment verification
