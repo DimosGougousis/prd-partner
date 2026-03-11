@@ -13,14 +13,14 @@ import {
 } from '@/components/ui/select';
 import { PRD, PRDStatus } from '@/types';
 import { calculatePRDProgress } from '@/data/mockData';
-import { usePRD } from '@/context/PRDContext';
+import { usePRDs } from '@/context/PRDContext';
 import SectionCard from '@/components/SectionCard';
 import Layout from '@/components/Layout';
 
 export default function PRDDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { prds } = usePRD();
+  const { prds } = usePRDs();
   const [prd, setPRD] = useState<PRD | null>(null);
 
   useEffect(() => {
