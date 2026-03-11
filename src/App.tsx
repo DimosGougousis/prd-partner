@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PRDProvider } from "@/context/PRDContext";
 import Dashboard from "./pages/Dashboard";
 import PRDList from "./pages/PRDList";
+import PRDDetail from "./pages/PRDDetail";
 import KanbanBoard from "./pages/KanbanBoard";
 import Stakeholders from "./pages/Stakeholders";
 import AIInsights from "./pages/AIInsights";
@@ -25,6 +26,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/prds" element={<PRDList />} />
+              <Route path="/prd/:id" element={<PRDDetail />} />
               <Route path="/kanban" element={<KanbanBoard />} />
               <Route path="/stakeholders" element={<Stakeholders />} />
               <Route path="/insights" element={<AIInsights />} />
