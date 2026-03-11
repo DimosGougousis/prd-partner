@@ -12,22 +12,24 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PRD, PRDStatus } from '@/types';
-import { mockPRDs, calculatePRDProgress } from '@/data/mockData';
+import { calculatePRDProgress } from '@/data/mockData';
+import { usePRD } from '@/context/PRDContext';
 import SectionCard from '@/components/SectionCard';
 import Layout from '@/components/Layout';
 
 export default function PRDDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { prds } = usePRD();
   const [prd, setPRD] = useState<PRD | null>(null);
 
   useEffect(() => {
-    // In real app, fetch from API/context
-    const foundPRD = mockPRDs.find((p) => p.id === id);
+    // Find PRD from context (includes localStorage data)
+    const foundPRD = prds.find((p) => p.id === id);
     if (foundPRD) {
       setPRD(foundPRD);
     }
-  }, [id]);
+  }, [id, prds]);
 
   const handleStatusChange = (newStatus: PRDStatus) => {
     if (prd) {
