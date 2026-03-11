@@ -3,6 +3,7 @@ import { PRD } from '@/types/prd';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
 import StatusBadge from './StatusBadge';
 import PriorityIndicator from './PriorityIndicator';
 import { Calendar, Users } from 'lucide-react';
@@ -10,9 +11,11 @@ import { getStakeholderById } from '@/data/mockData';
 
 interface PRDCardProps {
   prd: PRD;
+  selected?: boolean;
+  onSelect?: (id: string) => void;
 }
 
-const PRDCard = ({ prd }: PRDCardProps) => {
+const PRDCard = ({ prd, selected, onSelect }: PRDCardProps) => {
   const getInitials = (name: string | { name?: string } | undefined) => {
     const nameStr = typeof name === 'string' ? name : (name?.name || 'U');
     return nameStr
@@ -31,21 +34,31 @@ const PRDCard = ({ prd }: PRDCardProps) => {
     .filter((s): s is NonNullable<typeof s> => s !== undefined);
 
   return (
-    <Link to={`/prd/${prd.id}`}>
-      <Card className="card-hover cursor-pointer border border-border bg-card p-5 transition-all hover:border-primary/20">
-        <div className="space-y-4">
-          {/* Header */}
-          <div className="flex items-start justify-between gap-3">
+    <Card className="card-hover cursor-pointer border border-border bg-card p-5 transition-all hover:border-primary/20">
+      <div className="space-y-4">
+        {/* Header with Checkbox */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-2 flex-1 min-w-0">
+            {onSelect && (
+              <Checkbox
+                checked={selected}
+                onCheckedChange={() => onSelect(prd.id)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
             <div className="min-w-0 flex-1">
-              <h3 className="truncate text-base font-semibold text-foreground">
-                {prd.title}
-              </h3>
+              <Link to={`/prd/${prd.id}`}>
+                <h3 className="truncate text-base font-semibold text-foreground hover:text-primary">
+                  {prd.title}
+                </h3>
+              </Link>
               <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                 {prd.description}
               </p>
             </div>
-            <PriorityIndicator priority={prd.priority} />
           </div>
+          <PriorityIndicator priority={prd.priority} />
+        </div>
 
           {/* Progress */}
           <div className="space-y-2">

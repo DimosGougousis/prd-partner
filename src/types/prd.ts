@@ -1,6 +1,6 @@
 // Core Type Definitions for AI PM Agent
 
-export type PRDStatus = 'backlog' | 'research' | 'waiting' | 'review' | 'complete';
+export type PRDStatus = 'backlog' | 'research' | 'waiting' | 'review' | 'complete' | 'archived';
 export type SectionStatus = 'not_started' | 'in_progress' | 'review' | 'complete';
 export type Priority = 'P0' | 'P1' | 'P2';
 export type RACIRole = 'responsible' | 'accountable' | 'consulted' | 'informed';

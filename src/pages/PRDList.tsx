@@ -4,6 +4,7 @@ import PRDCard from '@/components/prd/PRDCard';
 import { usePRDs } from '@/context/PRDContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -11,18 +12,78 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Search, Filter, LayoutGrid, List, Loader2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Plus, Search, Filter, LayoutGrid, List, Loader2, Trash2, Archive } from 'lucide-react';
 import { PRDStatus, Priority } from '@/types/prd';
 import { cn } from '@/lib/utils';
 import CreatePRDModal from '@/components/prd/CreatePRDModal';
 
 const PRDList = () => {
-  const { prds, isLoading } = usePRDs();
+  const { prds, isLoading, deletePRD, updatePRD } = usePRDs();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<PRDStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  
+  // Bulk actions state
+  const [selectedPRDs, setSelectedPRDs] = useState<Set<string>>(new Set());
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [showBulkArchiveDialog, setShowBulkArchiveDialog] = useState(false);
+  const [showBulkPriorityDialog, setShowBulkPriorityDialog] = useState(false);
+  const [bulkPriority, setBulkPriority] = useState<Priority>('P1');
+
+  const filteredPRDs = prds.filter((prd) => {
+    const matchesSearch =
+      prd.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prd.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || prd.status === statusFilter;
+    const matchesPriority = priorityFilter === 'all' || prd.priority === priorityFilter;
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
+
+  const togglePRDSelection = (prdId: string) => {
+    const newSelected = new Set(selectedPRDs);
+    if (newSelected.has(prdId)) {
+      newSelected.delete(prdId);
+    } else {
+      newSelected.add(prdId);
+    }
+    setSelectedPRDs(newSelected);
+  };
+
+  const selectAllPRDs = () => {
+    if (selectedPRDs.size === filteredPRDs.length) {
+      setSelectedPRDs(new Set());
+    } else {
+      setSelectedPRDs(new Set(filteredPRDs.map(p => p.id)));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    selectedPRDs.forEach(id => deletePRD(id));
+    setSelectedPRDs(new Set());
+    setShowBulkDeleteDialog(false);
+  };
+
+  const handleBulkArchive = () => {
+    selectedPRDs.forEach(id => updatePRD(id, { status: 'archived' }));
+    setSelectedPRDs(new Set());
+    setShowBulkArchiveDialog(false);
+  };
+
+  const handleBulkPriorityChange = () => {
+    selectedPRDs.forEach(id => updatePRD(id, { priority: bulkPriority }));
+    setSelectedPRDs(new Set());
+    setShowBulkPriorityDialog(false);
+  };
 
   const filteredPRDs = prds.filter((prd) => {
     const matchesSearch =
@@ -67,9 +128,10 @@ const PRDList = () => {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="backlog">Backlog</SelectItem>
                 <SelectItem value="research">Research</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="waiting">Waiting</SelectItem>
                 <SelectItem value="review">Review</SelectItem>
                 <SelectItem value="complete">Complete</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
               </SelectContent>
             </Select>
 
@@ -87,6 +149,38 @@ const PRDList = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Bulk Actions */}
+            {selectedPRDs.size > 0 && (
+              <div className="flex items-center gap-2 mr-4">
+                <span className="text-sm text-muted-foreground">
+                  {selectedPRDs.size} selected
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowBulkArchiveDialog(true)}
+                >
+                  <Archive className="h-4 w-4 mr-2" />
+                  Archive
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowBulkPriorityDialog(true)}
+                >
+                  Change Priority
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowBulkDeleteDialog(true)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            )}
+
             {/* View Toggle */}
             <div className="flex rounded-lg border border-border p-1">
               <button
@@ -120,6 +214,19 @@ const PRDList = () => {
           </div>
         </div>
 
+        {/* Select All Checkbox */}
+        {filteredPRDs.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={selectedPRDs.size === filteredPRDs.length && filteredPRDs.length > 0}
+              onCheckedChange={selectAllPRDs}
+            />
+            <span className="text-sm text-muted-foreground">
+              Select all {filteredPRDs.length} PRDs
+            </span>
+          </div>
+        )}
+
         {/* Results count */}
         <p className="text-sm text-muted-foreground">
           Showing {filteredPRDs.length} of {prds.length} PRDs
@@ -136,7 +243,12 @@ const PRDList = () => {
             )}
           >
             {filteredPRDs.map((prd) => (
-              <PRDCard key={prd.id} prd={prd} />
+              <PRDCard 
+                key={prd.id} 
+                prd={prd} 
+                selected={selectedPRDs.has(prd.id)}
+                onSelect={togglePRDSelection}
+              />
             ))}
           </div>
         ) : (
@@ -153,6 +265,84 @@ const PRDList = () => {
       </div>
 
       <CreatePRDModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
+
+      {/* Bulk Delete Dialog */}
+      <Dialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-500" />
+              Delete {selectedPRDs.size} PRDs
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {selectedPRDs.size} PRDs? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleBulkDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Archive Dialog */}
+      <Dialog open={showBulkArchiveDialog} onOpenChange={setShowBulkArchiveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Archive className="w-5 h-5 text-blue-500" />
+              Archive {selectedPRDs.size} PRDs
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to archive {selectedPRDs.size} PRDs? Archived PRDs can be restored later.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkArchiveDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkArchive}>
+              Archive
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Priority Dialog */}
+      <Dialog open={showBulkPriorityDialog} onOpenChange={setShowBulkPriorityDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Priority for {selectedPRDs.size} PRDs</DialogTitle>
+            <DialogDescription>
+              Select the new priority level for the selected PRDs.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Select value={bulkPriority} onValueChange={(v) => setBulkPriority(v as Priority)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="P0">P0 - Critical</SelectItem>
+                <SelectItem value="P1">P1 - High</SelectItem>
+                <SelectItem value="P2">P2 - Medium</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkPriorityDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkPriorityChange}>
+              Change Priority
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
