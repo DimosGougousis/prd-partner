@@ -148,6 +148,73 @@ export interface Conflict {
   description: string;
   affectedSections: string[];
   affectedStakeholders: string[];
+}
+
+// Orchestrator Multi-Agent Types
+export interface SectionOrchestrator {
+  sectionId: string;
+  brainstorming: BrainstormingSession[];
+  criteria: SectionCriteria[];
+  agentInsights: AgentInsight[];
+  consensus: Consensus | null;
+}
+
+export interface BrainstormingSession {
+  id: string;
+  agentId: string;
+  agentName: string;
+  agentRole: string;
+  timestamp: string;
+  ideas: BrainstormingIdea[];
+  status: 'active' | 'completed' | 'archived';
+}
+
+export interface BrainstormingIdea {
+  id: string;
+  content: string;
+  category: 'requirement' | 'constraint' | 'assumption' | 'risk' | 'opportunity';
+  confidence: number;
+  votes: number;
+  selected: boolean;
+  rationale: string;
+}
+
+export interface SectionCriteria {
+  id: string;
+  category: 'functional' | 'technical' | 'business' | 'user_experience' | 'compliance';
+  description: string;
+  priority: Priority;
+  acceptanceCriteria: string[];
+  validationMethod: string;
+  definedBy: string[];
+  status: 'draft' | 'review' | 'approved' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgentInsight {
+  id: string;
+  agentId: string;
+  agentName: string;
+  agentAvatar: string;
+  type: 'question' | 'suggestion' | 'concern' | 'validation';
+  content: string;
+  sectionReference?: string;
+  timestamp: string;
+  acknowledged: boolean;
+  incorporated: boolean;
+}
+
+export interface Consensus {
+  sectionId: string;
+  summary: string;
+  keyPoints: string[];
+  agreedCriteria: string[];
+  openQuestions: string[];
+  nextSteps: string[];
+  participants: string[];
+  reachedAt: string;
+  confidence: number;
   detectedAt: string;
   resolved: boolean;
   resolutionOptions: ConflictResolution[];

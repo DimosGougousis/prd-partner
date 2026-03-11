@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Clock, Users, CheckCircle2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Clock, Users, CheckCircle2, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -10,18 +10,21 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { PRDSection, SectionStatus } from '@/types';
+import { PRDSection, SectionStatus, SectionOrchestrator } from '@/types';
 import { getStakeholderById } from '@/data/mockData';
 import RichTextEditor from './RichTextEditor';
+import SectionOrchestratorModal from './SectionOrchestratorModal';
 
 interface SectionCardProps {
   section: PRDSection;
   prdTitle: string;
   onUpdate: (sectionId: string, updates: Partial<PRDSection>) => void;
+  onUpdateOrchestrator?: (sectionId: string, orchestrator: Partial<SectionOrchestrator>) => void;
 }
 
-export default function SectionCard({ section, prdTitle, onUpdate }: SectionCardProps) {
+export default function SectionCard({ section, prdTitle, onUpdate, onUpdateOrchestrator }: SectionCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isOrchestratorOpen, setIsOrchestratorOpen] = useState(false);
 
   const statusColors: Record<SectionStatus, string> = {
     not_started: 'bg-gray-200 text-gray-700',
@@ -85,6 +88,18 @@ export default function SectionCard({ section, prdTitle, onUpdate }: SectionCard
             </div>
           </button>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOrchestratorOpen(true);
+              }}
+              className="gap-1"
+            >
+              <Brain className="w-4 h-4" />
+              Orchestrate
+            </Button>
             <Badge className={statusColors[section.status]} variant="secondary">
               {statusLabels[section.status]}
             </Badge>
@@ -192,6 +207,14 @@ export default function SectionCard({ section, prdTitle, onUpdate }: SectionCard
           </div>
         </CardContent>
       )}
+
+      {/* Orchestrator Modal */}
+      <SectionOrchestratorModal
+        section={section}
+        isOpen={isOrchestratorOpen}
+        onClose={() => setIsOrchestratorOpen(false)}
+        onUpdateOrchestrator={onUpdateOrchestrator || (() => {})}
+      />
     </Card>
   );
 }
