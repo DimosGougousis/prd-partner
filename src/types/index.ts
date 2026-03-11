@@ -1,3 +1,6 @@
+// Re-export all types from prd.ts
+export * from './prd';
+
 // Core Type Definitions for AI PM Agent
 
 export type PRDStatus = 'backlog' | 'research' | 'waiting' | 'review' | 'complete';
@@ -193,4 +196,82 @@ export interface DashboardMetrics {
   userSatisfaction: number;
   systemReliability: number;
   dataQuality: number;
+}
+
+// Section Orchestrator Types
+export interface SectionOrchestrator {
+  id: string;
+  sectionId: string;
+  brainstorming: BrainstormingSession[];
+  criteria: SectionCriteria[];
+  insights: AgentInsight[];
+  consensus?: ConsensusView;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BrainstormingSession {
+  id: string;
+  agentId: string;
+  agentName: string;
+  agentRole: string;
+  timestamp: string;
+  ideas: BrainstormingIdea[];
+  status: 'in_progress' | 'completed' | 'cancelled';
+}
+
+export interface BrainstormingIdea {
+  id: string;
+  content: string;
+  category: 'requirement' | 'constraint' | 'assumption' | 'risk' | 'opportunity' | 'technical' | 'business' | 'user_experience' | 'compliance';
+  confidence: number;
+  votes: number;
+  selected: boolean;
+  rationale?: string;
+  suggestedBy?: string;
+  createdAt?: string;
+}
+
+export interface SectionCriteria {
+  id: string;
+  category: 'functional' | 'technical' | 'business' | 'user_experience' | 'compliance';
+  description: string;
+  priority: 'P0' | 'P1' | 'P2';
+  acceptanceCriteria: string[];
+  validationMethod: string;
+  definedBy: string[];
+  status: 'draft' | 'review' | 'approved' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgentInsight {
+  id: string;
+  agentId: string;
+  agentName: string;
+  agentAvatar: string;
+  type: 'question' | 'suggestion' | 'concern' | 'validation';
+  content: string;
+  timestamp: string;
+  acknowledged: boolean;
+  incorporated: boolean;
+}
+
+export interface ConsensusView {
+  id: string;
+  sectionId: string;
+  summary: string;
+  selectedIdeas: BrainstormingIdea[];
+  agreedCriteria: SectionCriteria[];
+  stakeholderVotes: StakeholderVote[];
+  confidenceScore: number;
+  createdAt: string;
+}
+
+export interface StakeholderVote {
+  stakeholderId: string;
+  stakeholderName: string;
+  vote: 'approve' | 'reject' | 'abstain';
+  comment?: string;
+  votedAt: string;
 }
