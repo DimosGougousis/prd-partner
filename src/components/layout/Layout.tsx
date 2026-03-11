@@ -44,7 +44,7 @@ export default function Layout({ children, title, subtitle }: LayoutProps) {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
                 PM
               </div>
-              <span className="text-xl font-bold">PRD Partner</span>
+              <span className="text-xl font-bold">PRD Kanban</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-1">

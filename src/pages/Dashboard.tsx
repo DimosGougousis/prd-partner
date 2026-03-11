@@ -20,7 +20,7 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <Layout title="Dashboard" subtitle="Overview of your PRD portfolio">
+      <Layout title="Dashboard" subtitle="Overview of your PRD Kanban board">
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -29,7 +29,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Layout title="Dashboard" subtitle="Overview of your PRD portfolio">
+    <Layout title="Dashboard" subtitle="Overview of your PRD Kanban board">
       <div className="space-y-6 animate-fade-in p-6">
         {/* Metrics Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
