@@ -19,6 +19,7 @@ export default function GovernanceDashboard() {
   const { data: deliveryMetrics, isLoading, refetch } = useDeliveryMetrics({
     productId: selectedProduct,
     sprintCount: 5,
+    useMock: true, // Enable mock data for demonstration
   });
 
   // Calculate days remaining for active sprint
