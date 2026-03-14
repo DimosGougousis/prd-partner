@@ -1,7 +1,7 @@
 /**
  * PO Governance Dashboard - Main Page
  * 
- * Stage 1 & 2 Implementation: Delivery, Quality & Backlog
+ * Stage 1, 2 & 3 Implementation: Delivery, Quality, Backlog, Customer & Financial
  */
 
 import * as React from 'react';
@@ -17,9 +17,15 @@ import { SecurityFindingsBadge } from '@/components/governance/quality/SecurityF
 import { BacklogHealthCard } from '@/components/governance/backlog/BacklogHealthCard';
 import { BacklogAgingChart } from '@/components/governance/backlog/BacklogAgingChart';
 import { StoryReadinessChart } from '@/components/governance/backlog/StoryReadinessChart';
+import { NPSCsatTrendChart } from '@/components/governance/customer/NPSCsatTrendChart';
+import { SupportTicketVolume } from '@/components/governance/customer/SupportTicketVolume';
+import { BudgetBurnChart } from '@/components/governance/financial/BudgetBurnChart';
+import { CostPerStoryPoint } from '@/components/governance/financial/CostPerStoryPoint';
 import { useDeliveryMetrics } from '@/hooks/governance/useDeliveryMetrics';
 import { useQualityMetrics } from '@/hooks/governance/useQualityMetrics';
 import { useBacklogMetrics } from '@/hooks/governance/useBacklogMetrics';
+import { useCustomerMetrics } from '@/hooks/governance/useCustomerMetrics';
+import { useFinancialMetrics } from '@/hooks/governance/useFinancialMetrics';
 
 export default function GovernanceDashboard() {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -40,12 +46,24 @@ export default function GovernanceDashboard() {
     useMock: true,
   });
 
-  const isLoading = isLoadingDelivery || isLoadingQuality || isLoadingBacklog;
+  const { data: customerMetrics, isLoading: isLoadingCustomer, refetch: refetchCustomer } = useCustomerMetrics({
+    productId: selectedProduct,
+    useMock: true,
+  });
+
+  const { data: financialMetrics, isLoading: isLoadingFinancial, refetch: refetchFinancial } = useFinancialMetrics({
+    productId: selectedProduct,
+    useMock: true,
+  });
+
+  const isLoading = isLoadingDelivery || isLoadingQuality || isLoadingBacklog || isLoadingCustomer || isLoadingFinancial;
 
   const handleRefresh = () => {
     refetchDelivery();
     refetchQuality();
     refetchBacklog();
+    refetchCustomer();
+    refetchFinancial();
   };
 
   // Calculate days remaining for active sprint
@@ -131,7 +149,7 @@ export default function GovernanceDashboard() {
               />
             </div>
             
-            {/* Right Column - Backlog */}
+            {/* Right Column - Backlog, Customer & Financial */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-700">Backlog Health</h2>
 
@@ -148,6 +166,32 @@ export default function GovernanceDashboard() {
               <StoryReadinessChart
                 metrics={backlogMetrics}
                 isLoading={isLoadingBacklog}
+              />
+
+              {/* Customer Metrics */}
+              <h2 className="text-lg font-semibold text-gray-700 mt-6">Customer Metrics</h2>
+
+              <NPSCsatTrendChart
+                metrics={customerMetrics}
+                isLoading={isLoadingCustomer}
+              />
+
+              <SupportTicketVolume
+                metrics={customerMetrics}
+                isLoading={isLoadingCustomer}
+              />
+
+              {/* Financial Metrics */}
+              <h2 className="text-lg font-semibold text-gray-700 mt-6">Financial</h2>
+
+              <BudgetBurnChart
+                metrics={financialMetrics}
+                isLoading={isLoadingFinancial}
+              />
+
+              <CostPerStoryPoint
+                metrics={financialMetrics}
+                isLoading={isLoadingFinancial}
               />
 
               {/* Placeholder for Compliance */}
