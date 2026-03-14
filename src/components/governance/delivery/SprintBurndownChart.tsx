@@ -1,26 +1,25 @@
 /**
  * Sprint Burndown Chart - Active sprint remaining work over time
- * 
- * TODO[GAP-006]: JIRA Burndown Data Requirements
- *   - Active sprint: `sprint in openSprints()`
- *   - Daily remaining story points
- *   - Ideal burndown line (linear from total to 0)
- *   - Actual burndown line (real remaining)
- * 
- * TODO: Handle case when no active sprint
- * TODO: Add sprint goal progress indicator
  */
 
+import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface BurndownPoint {
-  date: Date;
-  remaining: number;
-  ideal: number;
-}
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import type { BurndownPoint } from '@/hooks/governance/useDeliveryMetrics';
 
 interface SprintBurndownChartProps {
   sprintName: string;
+  goal?: string;
   data: BurndownPoint[];
   totalPoints: number;
   isLoading: boolean;
@@ -28,12 +27,17 @@ interface SprintBurndownChartProps {
 
 export function SprintBurndownChart({
   sprintName,
+  goal,
   data,
   totalPoints,
   isLoading,
 }: SprintBurndownChartProps) {
-  // TODO: Calculate if sprint is on track
-  // const isOnTrack = data[data.length - 1]?.remaining <= data[data.length - 1]?.ideal;
+  // Calculate if sprint is on track
+  const isOnTrack = React.useMemo(() => {
+    if (!data || data.length === 0) return true;
+    const lastPoint = data[data.length - 1];
+    return lastPoint.remaining <= lastPoint.ideal * 1.1; // 10% tolerance
+  }, [data]);
 
   if (isLoading) {
     return (
@@ -48,36 +52,99 @@ export function SprintBurndownChart({
     );
   }
 
+  // Handle no active sprint
+  if (!sprintName || !data || data.length === 0) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Sprint Burndown</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-48 bg-gray-50 rounded flex items-center justify-center text-sm text-gray-400">
+            No active sprint
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Format data for chart
+  const chartData = data.map(point => ({
+    ...point,
+    dateLabel: format(point.date, 'MMM dd'),
+  }));
+
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">
-          Sprint Burndown: {sprintName || 'No Active Sprint'}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-medium">
+            Sprint Burndown: {sprintName}
+          </CardTitle>
+          <Badge 
+            variant={isOnTrack ? 'default' : 'destructive'}
+            className={`text-xs ${isOnTrack ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}`}
+          >
+            {isOnTrack ? 'On Track' : 'At Risk'}
+          </Badge>
+        </div>
+        {goal && (
+          <p className="text-xs text-gray-500 truncate">{goal}</p>
+        )}
       </CardHeader>
       <CardContent>
-        {/* TODO: Implement Recharts LineChart
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" tickFormatter={(d) => format(d, 'MMM dd')} />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="ideal" stroke="#94a3b8" strokeDasharray="5 5" name="Ideal" />
-            <Line type="monotone" dataKey="remaining" stroke="#3b82f6" name="Actual" />
+        <ResponsiveContainer width="100%" height={180}>
+          <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+            <XAxis 
+              dataKey="dateLabel" 
+              tick={{ fontSize: 10 }}
+              axisLine={false}
+              tickLine={false}
+              interval="preserveStartEnd"
+            />
+            <YAxis 
+              tick={{ fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <Tooltip 
+              contentStyle={{ fontSize: 12, borderRadius: 6 }}
+              formatter={(value: number) => [`${value} pts`, '']}
+              labelFormatter={(label) => label}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="ideal" 
+              stroke="#94a3b8" 
+              strokeDasharray="4 4"
+              strokeWidth={2}
+              dot={false}
+              name="Ideal"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="remaining" 
+              stroke="#3b82f6" 
+              strokeWidth={2}
+              dot={{ r: 3, fill: '#3b82f6' }}
+              activeDot={{ r: 5 }}
+              name="Actual"
+            />
           </LineChart>
         </ResponsiveContainer>
-        */}
-        <div className="h-48 bg-gray-50 rounded flex items-center justify-center text-sm text-gray-400">
-          TODO: Burndown chart (Stage 1)
-        </div>
         
-        {/* TODO: Add on-track indicator */}
-        <div className="mt-3 flex items-center gap-2 text-xs">
-          <span className="text-gray-500">Status:</span>
-          <span className="text-gray-400">TODO: On track / At risk</span>
+        {/* Stats */}
+        <div className="mt-3 pt-3 border-t flex items-center justify-between text-xs">
+          <span className="text-gray-500">Total scope: <span className="font-medium">{totalPoints} pts</span></span>
+          <span className="text-gray-500">
+            Remaining: <span className="font-medium">{data[data.length - 1]?.remaining || 0} pts</span>
+          </span>
         </div>
       </CardContent>
     </Card>
   );
 }
+
+// Need React import for useMemo
+import * as React from 'react';

@@ -96,3 +96,34 @@ export interface JiraWebhookPayload {
     }>;
   };
 }
+
+// Sprint-related types for Governance Dashboard
+export interface JiraSprint {
+  id: number;
+  name: string;
+  state: 'active' | 'closed' | 'future';
+  startDate?: string;
+  endDate?: string;
+  completeDate?: string;
+  goal?: string;
+}
+
+export interface SprintMetrics {
+  sprintId: number;
+  sprintName: string;
+  committed: number; // Story points at start
+  completed: number; // Story points done
+  inProgress: number;
+  notStarted: number;
+  startDate: string;
+  endDate: string;
+}
+
+export interface BurndownData {
+  sprintId: number;
+  points: Array<{
+    date: string;
+    remaining: number;
+    ideal: number;
+  }>;
+}

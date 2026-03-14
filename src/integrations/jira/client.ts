@@ -186,10 +186,30 @@ class JiraClient {
     });
   }
 
-  // Search issues
-  async searchIssues(jql: string, maxResults = 50): Promise<JiraIssue[]> {
-    const response = await this.request<{ issues: JiraIssue[] }>(`/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}`);
+  // Search issues with JQL - enhanced for sprint queries
+  async searchIssues(jql: string, maxResults = 50, fields?: string[]): Promise<JiraIssue[]> {
+    const fieldParam = fields ? `&fields=${fields.join(',')}` : '';
+    const response = await this.request<{ issues: JiraIssue[] }>(`/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}${fieldParam}`);
     return response.issues;
+  }
+
+  // Get all sprints for a board (Agile API)
+  async getSprints(boardId: number, state: 'active' | 'future' | 'closed' = 'active'): Promise<Array<{ id: number; name: string; state: string; startDate?: string; endDate?: string }>> {
+    const response = await this.request<{ values: Array<{ id: number; name: string; state: string; startDate?: string; endDate?: string }> }>(`/board/${boardId}/sprint?state=${state}`);
+    return response.values;
+  }
+
+  // Get sprint issues with story points (Agile API)
+  async getSprintIssues(sprintId: number, fields?: string[]): Promise<JiraIssue[]> {
+    const fieldParam = fields ? `?fields=${fields.join(',')}` : '';
+    const response = await this.request<{ issues: JiraIssue[] }>(`/sprint/${sprintId}/issue${fieldParam}`);
+    return response.issues;
+  }
+
+  // Get boards for a project
+  async getBoards(projectKey: string): Promise<Array<{ id: number; name: string; type: string }>> {
+    const response = await this.request<{ values: Array<{ id: number; name: string; type: string }> }>(`/board?projectKeyOrId=${projectKey}`);
+    return response.values;
   }
 
   // Add comment to issue

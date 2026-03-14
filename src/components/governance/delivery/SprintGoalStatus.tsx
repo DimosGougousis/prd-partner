@@ -1,39 +1,90 @@
 /**
  * Sprint Goal Status - Progress indicator for current sprint goal
- * 
- * TODO[GAP-007]: Sprint Goal Data Source
- *   - JIRA Sprint field: `goal` (if available via API)
- *   - Or parse from sprint name/description
- *   - Progress: % of stories completed vs total
  */
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, AlertCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, Circle, AlertCircle, Target } from 'lucide-react';
 
 interface SprintGoalStatusProps {
-  goal: string;
+  goal?: string;
   progress: number; // 0-100
-  storiesCompleted: number;
-  storiesTotal: number;
+  daysRemaining: number;
   isLoading: boolean;
+}
+
+function getStatusConfig(progress: number, daysRemaining: number) {
+  // Calculate if on track based on progress vs time elapsed
+  const totalSprintDays = 14; // Assume 2-week sprints
+  const daysElapsed = totalSprintDays - daysRemaining;
+  const expectedProgress = (daysElapsed / totalSprintDays) * 100;
+  const progressDelta = progress - expectedProgress;
+  
+  if (progress >= 100) {
+    return { 
+      icon: CheckCircle, 
+      color: 'text-green-500', 
+      bg: 'bg-green-50',
+      badge: 'Completed',
+      badgeVariant: 'default' as const
+    };
+  }
+  if (progressDelta >= -10) {
+    return { 
+      icon: Circle, 
+      color: 'text-blue-500', 
+      bg: 'bg-blue-50',
+      badge: 'On Track',
+      badgeVariant: 'secondary' as const
+    };
+  }
+  if (progressDelta >= -20) {
+    return { 
+      icon: AlertCircle, 
+      color: 'text-yellow-500', 
+      bg: 'bg-yellow-50',
+      badge: 'At Risk',
+      badgeVariant: 'outline' as const
+    };
+  }
+  return { 
+    icon: AlertCircle, 
+    color: 'text-red-500', 
+    bg: 'bg-red-50',
+    badge: 'Behind',
+    badgeVariant: 'destructive' as const
+  };
 }
 
 export function SprintGoalStatus({
   goal,
   progress,
-  storiesCompleted,
-  storiesTotal,
+  daysRemaining,
   isLoading,
 }: SprintGoalStatusProps) {
-  // TODO: Determine status based on progress and days remaining
-  // const status = calculateStatus(progress, daysRemaining);
+  const status = getStatusConfig(progress || 0, daysRemaining);
+  const StatusIcon = status.icon;
 
   if (isLoading) {
     return (
       <Card>
         <CardContent className="p-4">
-          <div className="h-16 bg-gray-100 animate-pulse rounded" />
+          <div className="h-20 bg-gray-100 animate-pulse rounded" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Handle no active sprint
+  if (!goal && progress === 0) {
+    return (
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3 text-gray-400">
+            <Target className="w-5 h-5" />
+            <span className="text-sm">No active sprint goal</span>
+          </div>
         </CardContent>
       </Card>
     );
@@ -44,20 +95,22 @@ export function SprintGoalStatus({
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           {/* Status Icon */}
-          <div className="mt-1">
-            {progress >= 80 ? (
-              <CheckCircle className="w-5 h-5 text-green-500" />
-            ) : progress >= 50 ? (
-              <Circle className="w-5 h-5 text-yellow-500" />
-            ) : (
-              <AlertCircle className="w-5 h-5 text-red-500" />
-            )}
+          <div className={`p-2 rounded-full ${status.bg}`}>
+            <StatusIcon className={`w-5 h-5 ${status.color}`} />
           </div>
           
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-gray-500 uppercase tracking-wide">Sprint Goal</span>
+              <Badge variant={status.badgeVariant} className="text-xs">
+                {status.badge}
+              </Badge>
+            </div>
+            
             {/* Sprint Goal */}
-            <p className="text-sm font-medium mb-2">
-              {goal || 'TODO: Fetch sprint goal from JIRA'}
+            <p className="text-sm font-medium mb-3 line-clamp-2">
+              {goal || 'Complete sprint commitments'}
             </p>
             
             {/* Progress Bar */}
@@ -65,10 +118,8 @@ export function SprintGoalStatus({
             
             {/* Stats */}
             <div className="flex justify-between text-xs text-gray-500">
-              <span>{progress}% complete</span>
-              <span>
-                {storiesCompleted || '?'}/{storiesTotal || '?'} stories
-              </span>
+              <span>{Math.round(progress)}% complete</span>
+              <span>{daysRemaining} days remaining</span>
             </div>
           </div>
         </div>

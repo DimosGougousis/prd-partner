@@ -1,77 +1,112 @@
 /**
  * PO Governance Dashboard - Main Page
  * 
- * TODO[GAP-001]: Define relationship with existing ExecutiveDashboard
- *   - ExecutiveDashboard shows high-level business metrics
- *   - GovernanceDashboard shows operational SDLC health
- *   - Consider: Should ExecutiveDashboard embed Governance widgets?
- * 
- * TODO[GAP-002]: Add route to App.tsx
- *   - Path: /governance or /po-dashboard
- *   - Add to navigation in Layout component
- * 
- * TODO[STAGE-1]: Implement Delivery & Quality Foundation
- *   - GovernanceDashboardLayout with 3-column shell
- *   - TopBar with product selector, refresh toggle
- *   - VelocityTrendChart, SprintBurndownChart
- *   - DefectDensityChart, TestCoverageGauge
+ * Stage 1 Implementation: Delivery & Quality Foundation
  */
 
+import * as React from 'react';
 import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
-// TODO: Import components as they're built
-// import { GovernanceDashboardLayout } from '@/components/governance/GovernanceDashboardLayout';
-// import { TopBar } from '@/components/governance/TopBar';
-// import { VelocityTrendChart } from '@/components/governance/delivery/VelocityTrendChart';
+import { TopBar } from '@/components/governance/TopBar';
+import { VelocityTrendChart } from '@/components/governance/delivery/VelocityTrendChart';
+import { SprintBurndownChart } from '@/components/governance/delivery/SprintBurndownChart';
+import { SprintGoalStatus } from '@/components/governance/delivery/SprintGoalStatus';
+import { useDeliveryMetrics } from '@/hooks/governance/useDeliveryMetrics';
 
 export default function GovernanceDashboard() {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   
-  // TODO: Use React Query for data fetching
-  // const { data: deliveryMetrics, isLoading } = useDeliveryMetrics(selectedProduct);
-  // const { data: qualityMetrics } = useQualityMetrics(selectedProduct);
+  const { data: deliveryMetrics, isLoading, refetch } = useDeliveryMetrics({
+    productId: selectedProduct,
+    sprintCount: 5,
+  });
+
+  // Calculate days remaining for active sprint
+  const daysRemaining = React.useMemo(() => {
+    if (!deliveryMetrics?.activeSprint?.endDate) return 0;
+    const end = new Date(deliveryMetrics.activeSprint.endDate);
+    const now = new Date();
+    const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.max(0, diff);
+  }, [deliveryMetrics?.activeSprint]);
 
   return (
     <Layout>
-      <div className="container mx-auto p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">PO Governance Dashboard</h1>
-          <p className="text-gray-600">
-            Unified SDLC governance across 8 pillars
-          </p>
-        </div>
+      <div className="min-h-screen bg-gray-50">
+        {/* Top Bar */}
+        <TopBar
+          selectedProduct={selectedProduct}
+          onProductChange={setSelectedProduct}
+          lastUpdated={new Date()}
+          isRefreshing={isLoading}
+          onRefresh={refetch}
+        />
         
-        {/* TODO: Implement 3-column layout shell */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Strategic Panel */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Strategic Alignment</h2>
-            {/* TODO: <OKRProgressPanel /> */}
-            {/* TODO: <RoadmapTimeline /> */}
-            <div className="p-4 bg-gray-100 rounded-lg text-sm text-gray-500">
-              TODO: OKR Progress Panel (Stage 2)
-            </div>
+        {/* Main Content */}
+        <div className="container mx-auto p-6">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold mb-2">PO Governance Dashboard</h1>
+            <p className="text-gray-600">
+              Unified SDLC governance across 8 pillars
+            </p>
           </div>
           
-          {/* Delivery & Quality Panel */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Delivery & Quality</h2>
-            {/* TODO: <VelocityTrendChart /> */}
-            {/* TODO: <SprintBurndownChart /> */}
-            {/* TODO: <DefectDensityChart /> */}
-            <div className="p-4 bg-gray-100 rounded-lg text-sm text-gray-500">
-              TODO: Velocity & Burndown Charts (Stage 1)
+          {/* 3-column layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Strategic & Delivery */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-gray-700">Delivery Performance</h2>
+              
+              {/* Sprint Goal Status */}
+              <SprintGoalStatus
+                goal={deliveryMetrics?.activeSprint?.goal}
+                progress={deliveryMetrics?.sprintGoalProgress || 0}
+                daysRemaining={daysRemaining}
+                isLoading={isLoading}
+              />
+              
+              {/* Velocity Trend */}
+              <VelocityTrendChart
+                data={deliveryMetrics?.velocityTrend || []}
+                isLoading={isLoading}
+              />
             </div>
-          </div>
-          
-          {/* Operations Panel */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Operations</h2>
-            {/* TODO: <BacklogHealthCard /> */}
-            {/* TODO: <ComplianceStatusWidget /> */}
-            {/* TODO: <AlertRulesDrawer /> */}
-            <div className="p-4 bg-gray-100 rounded-lg text-sm text-gray-500">
-              TODO: Backlog & Compliance Widgets (Stage 2-4)
+            
+            {/* Center Column - Active Sprint & Quality */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-gray-700">Active Sprint</h2>
+              
+              {/* Sprint Burndown */}
+              <SprintBurndownChart
+                sprintName={deliveryMetrics?.activeSprint?.name || ''}
+                goal={deliveryMetrics?.activeSprint?.goal}
+                data={deliveryMetrics?.activeBurndown || []}
+                totalPoints={deliveryMetrics?.activeBurndown?.[0]?.remaining || 0}
+                isLoading={isLoading}
+              />
+              
+              {/* Placeholder for Quality Metrics */}
+              <div className="p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-500">
+                <h3 className="font-medium text-gray-700 mb-2">Quality Metrics</h3>
+                <p>Quality widgets coming in Stage 1 completion...</p>
+              </div>
+            </div>
+            
+            {/* Right Column - Operations */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-gray-700">Operations</h2>
+              
+              {/* Placeholder for Backlog Health */}
+              <div className="p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-500">
+                <h3 className="font-medium text-gray-700 mb-2">Backlog Health</h3>
+                <p>Backlog widgets coming in Stage 2...</p>
+              </div>
+              
+              {/* Placeholder for Compliance */}
+              <div className="p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-500">
+                <h3 className="font-medium text-gray-700 mb-2">Compliance</h3>
+                <p>Compliance widgets coming in Stage 4...</p>
+              </div>
             </div>
           </div>
         </div>

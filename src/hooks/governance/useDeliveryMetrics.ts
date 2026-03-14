@@ -1,55 +1,170 @@
 /**
  * useDeliveryMetrics Hook - Fetch delivery metrics from JIRA
  * 
- * TODO[GAP-015]: JIRA API Integration
- *   - Extend existing src/integrations/jira/client.ts
- *   - Add methods:
- *     - getSprintVelocity(projectKey, sprintCount)
- *     - getActiveSprintBurndown(projectKey)
- *     - getSprintGoalProgress(projectKey)
- * 
- * TODO: Implement React Query with proper caching
- *   - staleTime: 5 minutes
- *   - refetchInterval: 5 minutes
+ * Fetches sprint velocity, burndown, and goal progress from JIRA
+ * Uses React Query for caching and automatic refetching
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { jiraClient } from '@/integrations/jira/client';
+import type { JiraSprint, SprintMetrics, BurndownData } from '@/integrations/jira/types';
 
-interface SprintVelocity {
+// Story points custom field - may vary by JIRA instance
+const STORY_POINTS_FIELD = 'customfield_10016';
+
+export interface SprintVelocity {
   sprintName: string;
   committed: number;
   completed: number;
   startDate: Date;
 }
 
-interface BurndownPoint {
+export interface BurndownPoint {
   date: Date;
   remaining: number;
   ideal: number;
 }
 
-interface DeliveryMetrics {
+export interface DeliveryMetrics {
   velocityTrend: SprintVelocity[];
   activeBurndown: BurndownPoint[];
   sprintGoalProgress: number;
   leadTimeDays: number;
   cycleTimeDays: number;
+  activeSprint: {
+    id: number;
+    name: string;
+    goal?: string;
+    startDate: string;
+    endDate: string;
+  } | null;
 }
 
 interface UseDeliveryMetricsOptions {
-  productId: string | null;
+  productId: string | null; // JIRA project key
   sprintCount?: number;
 }
 
+// Calculate story points from JIRA issues
+function calculateStoryPoints(issues: Array<{ fields: Record<string, unknown> }>): number {
+  return issues.reduce((total, issue) => {
+    const points = issue.fields[STORY_POINTS_FIELD] as number | undefined;
+    return total + (points || 0);
+  }, 0);
+}
+
+// Fetch delivery metrics from JIRA
 const fetchDeliveryMetrics = async (
-  productId: string,
+  projectKey: string,
   sprintCount: number
 ): Promise<DeliveryMetrics> => {
-  // TODO: Implement API call
-  // const response = await fetch(`/api/governance/metrics/delivery/${productId}?sprintCount=${sprintCount}`);
-  // return response.json();
+  // Get boards for the project
+  const boards = await jiraClient.getBoards(projectKey);
+  if (boards.length === 0) {
+    throw new Error(`No boards found for project ${projectKey}`);
+  }
   
-  throw new Error('TODO: Implement fetchDeliveryMetrics');
+  const boardId = boards[0].id;
+  
+  // Get closed sprints for velocity calculation
+  const closedSprints = await jiraClient.getSprints(boardId, 'closed');
+  const recentSprints = closedSprints.slice(0, sprintCount);
+  
+  // Calculate velocity for each sprint
+  const velocityTrend: SprintVelocity[] = await Promise.all(
+    recentSprints.map(async (sprint) => {
+      const issues = await jiraClient.getSprintIssues(sprint.id, [
+        'summary',
+        'status',
+        STORY_POINTS_FIELD,
+      ]);
+      
+      const committed = calculateStoryPoints(issues);
+      const completedIssues = issues.filter(
+        (issue) => issue.fields.status?.name === 'Done' || issue.fields.status?.name === 'Closed'
+      );
+      const completed = calculateStoryPoints(completedIssues);
+      
+      return {
+        sprintName: sprint.name,
+        committed,
+        completed,
+        startDate: new Date(sprint.startDate || Date.now()),
+      };
+    })
+  );
+  
+  // Get active sprint for burndown
+  const activeSprints = await jiraClient.getSprints(boardId, 'active');
+  const activeSprint = activeSprints[0] || null;
+  
+  let activeBurndown: BurndownPoint[] = [];
+  let sprintGoalProgress = 0;
+  
+  if (activeSprint) {
+    // Get issues in active sprint
+    const activeIssues = await jiraClient.getSprintIssues(activeSprint.id, [
+      'summary',
+      'status',
+      STORY_POINTS_FIELD,
+    ]);
+    
+    const totalPoints = calculateStoryPoints(activeIssues);
+    const completedPoints = calculateStoryPoints(
+      activeIssues.filter(
+        (issue) => issue.fields.status?.name === 'Done' || issue.fields.status?.name === 'Closed'
+      )
+    );
+    
+    sprintGoalProgress = totalPoints > 0 ? Math.round((completedPoints / totalPoints) * 100) : 0;
+    
+    // Generate burndown data (simplified - in real implementation, fetch historical data)
+    const startDate = new Date(activeSprint.startDate || Date.now());
+    const endDate = new Date(activeSprint.endDate || Date.now());
+    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const today = new Date();
+    const daysElapsed = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    activeBurndown = Array.from({ length: Math.min(daysElapsed + 1, totalDays + 1) }, (_, i) => {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      
+      // Ideal burndown: linear from total to 0
+      const ideal = totalPoints * (1 - i / totalDays);
+      
+      // Actual burndown: simplified calculation
+      // In real implementation, fetch historical snapshot data
+      const progressRatio = i / daysElapsed;
+      const actualCompleted = completedPoints * progressRatio;
+      const remaining = totalPoints - actualCompleted;
+      
+      return {
+        date,
+        remaining: Math.max(0, remaining),
+        ideal: Math.max(0, ideal),
+      };
+    });
+  }
+  
+  // Calculate lead time and cycle time (simplified)
+  // In real implementation, query issue changelog for status transitions
+  const leadTimeDays = 0;
+  const cycleTimeDays = 0;
+  
+  return {
+    velocityTrend,
+    activeBurndown,
+    sprintGoalProgress,
+    leadTimeDays,
+    cycleTimeDays,
+    activeSprint: activeSprint ? {
+      id: activeSprint.id,
+      name: activeSprint.name,
+      goal: activeSprint.goal,
+      startDate: activeSprint.startDate || '',
+      endDate: activeSprint.endDate || '',
+    } : null,
+  };
 };
 
 export function useDeliveryMetrics({
@@ -60,8 +175,7 @@ export function useDeliveryMetrics({
     queryKey: ['governance', 'delivery', productId, sprintCount],
     queryFn: () => fetchDeliveryMetrics(productId!, sprintCount),
     enabled: !!productId,
-    // TODO: Configure caching
-    // staleTime: 5 * 60 * 1000, // 5 minutes
-    // refetchInterval: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // 5 minutes
   });
 }

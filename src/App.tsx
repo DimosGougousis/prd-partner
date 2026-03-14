@@ -12,6 +12,7 @@ import Stakeholders from "./pages/Stakeholders";
 import AIInsights from "./pages/AIInsights";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import GovernanceDashboard from "./pages/po-dashboard/GovernanceDashboard";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ function App() {
               <Route path="/stakeholders" element={<Stakeholders />} />
               <Route path="/insights" element={<AIInsights />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/governance" element={<GovernanceDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </HashRouter>

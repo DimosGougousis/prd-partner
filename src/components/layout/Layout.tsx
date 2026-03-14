@@ -8,6 +8,7 @@ import {
   Sparkles,
   Settings,
   Bell,
+  BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ export default function Layout({ children, title, subtitle }: LayoutProps) {
     { path: '/kanban', icon: Kanban, label: 'Kanban' },
     { path: '/stakeholders', icon: Users, label: 'Stakeholders' },
     { path: '/insights', icon: Sparkles, label: 'AI Insights' },
+    { path: '/governance', icon: BarChart3, label: 'Governance' },
   ];
 
   const isActive = (path: string) => {
