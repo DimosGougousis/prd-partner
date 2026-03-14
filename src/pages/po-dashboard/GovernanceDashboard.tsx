@@ -11,16 +11,32 @@ import { TopBar } from '@/components/governance/TopBar';
 import { VelocityTrendChart } from '@/components/governance/delivery/VelocityTrendChart';
 import { SprintBurndownChart } from '@/components/governance/delivery/SprintBurndownChart';
 import { SprintGoalStatus } from '@/components/governance/delivery/SprintGoalStatus';
+import { DefectDensityChart } from '@/components/governance/quality/DefectDensityChart';
+import { TestCoverageGauge } from '@/components/governance/quality/TestCoverageGauge';
+import { SecurityFindingsBadge } from '@/components/governance/quality/SecurityFindingsBadge';
 import { useDeliveryMetrics } from '@/hooks/governance/useDeliveryMetrics';
+import { useQualityMetrics } from '@/hooks/governance/useQualityMetrics';
 
 export default function GovernanceDashboard() {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
-  
-  const { data: deliveryMetrics, isLoading, refetch } = useDeliveryMetrics({
+
+  const { data: deliveryMetrics, isLoading: isLoadingDelivery, refetch: refetchDelivery } = useDeliveryMetrics({
     productId: selectedProduct,
     sprintCount: 5,
-    useMock: true, // Enable mock data for demonstration
+    useMock: true,
   });
+
+  const { data: qualityMetrics, isLoading: isLoadingQuality, refetch: refetchQuality } = useQualityMetrics({
+    projectKey: selectedProduct,
+    useMock: true,
+  });
+
+  const isLoading = isLoadingDelivery || isLoadingQuality;
+
+  const handleRefresh = () => {
+    refetchDelivery();
+    refetchQuality();
+  };
 
   // Calculate days remaining for active sprint
   const daysRemaining = React.useMemo(() => {
@@ -40,7 +56,7 @@ export default function GovernanceDashboard() {
           onProductChange={setSelectedProduct}
           lastUpdated={new Date()}
           isRefreshing={isLoading}
-          onRefresh={refetch}
+          onRefresh={handleRefresh}
         />
         
         {/* Main Content */}
@@ -86,11 +102,23 @@ export default function GovernanceDashboard() {
                 isLoading={isLoading}
               />
               
-              {/* Placeholder for Quality Metrics */}
-              <div className="p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-500">
-                <h3 className="font-medium text-gray-700 mb-2">Quality Metrics</h3>
-                <p>Quality widgets coming in Stage 1 completion...</p>
-              </div>
+              {/* Quality Metrics */}
+              <h2 className="text-lg font-semibold text-gray-700">Quality Metrics</h2>
+
+              <TestCoverageGauge
+                metrics={qualityMetrics}
+                isLoading={isLoadingQuality}
+              />
+
+              <DefectDensityChart
+                metrics={qualityMetrics}
+                isLoading={isLoadingQuality}
+              />
+
+              <SecurityFindingsBadge
+                metrics={qualityMetrics}
+                isLoading={isLoadingQuality}
+              />
             </div>
             
             {/* Right Column - Operations */}
