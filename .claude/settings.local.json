@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__jcodemunch__index_folder",
+      "mcp__jcodemunch__get_file_tree",
+      "mcp__jcodemunch__get_file_outline",
+      "mcp__MCP_DOCKER__list_branches"
+    ]
+  }
+}
