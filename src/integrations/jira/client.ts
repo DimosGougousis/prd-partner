@@ -235,6 +235,59 @@ class JiraClient {
       }),
     });
   }
+
+  // Get backlog issues (issues not in any sprint)
+  async getBacklogIssues(projectKey: string, fields?: string[]): Promise<JiraIssue[]> {
+    const jql = `project = ${projectKey} AND sprint is EMPTY AND status != Done ORDER BY created DESC`;
+    const fieldParam = fields ? `&fields=${fields.join(',')}` : '';
+    const response = await this.request<{ issues: JiraIssue[] }>(
+      `/search?jql=${encodeURIComponent(jql)}&maxResults=100${fieldParam}`
+    );
+    return response.issues;
+  }
+
+  // Get all issues in a project (for metrics)
+  async getProjectIssues(
+    projectKey: string,
+    status?: string[],
+    fields?: string[]
+  ): Promise<JiraIssue[]> {
+    let jql = `project = ${projectKey}`;
+    if (status && status.length > 0) {
+      jql += ` AND status IN (${status.map((s) => `"${s}"`).join(',')})`;
+    }
+    jql += ' ORDER BY updated DESC';
+
+    const fieldParam = fields ? `&fields=${fields.join(',')}` : '';
+    const response = await this.request<{ issues: JiraIssue[] }>(
+      `/search?jql=${encodeURIComponent(jql)}&maxResults=200${fieldParam}`
+    );
+    return response.issues;
+  }
+
+  // Get issue changelog (for aging calculations)
+  async getIssueChangelog(issueKey: string): Promise<Array<{
+    id: string;
+    created: string;
+    items: Array<{
+      field: string;
+      fromString?: string;
+      toString?: string;
+    }>;
+  }>> {
+    const response = await this.request<{
+      values: Array<{
+        id: string;
+        created: string;
+        items: Array<{
+          field: string;
+          fromString?: string;
+          toString?: string;
+        }>;
+      }>;
+    }>(`/issue/${issueKey}/changelog`);
+    return response.values;
+  }
 }
 
 export const jiraClient = new JiraClient();

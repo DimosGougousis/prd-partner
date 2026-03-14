@@ -127,3 +127,65 @@ export interface BurndownData {
     ideal: number;
   }>;
 }
+
+// Backlog-related types for Governance Dashboard
+export interface BacklogIssue {
+  id: string;
+  key: string;
+  summary: string;
+  status: string;
+  issueType: string;
+  priority: string;
+  created: string;
+  updated: string;
+  storyPoints?: number;
+  assignee?: string;
+  labels: string[];
+  // Refinement fields
+  hasDescription: boolean;
+  hasAcceptanceCriteria: boolean;
+  hasStoryPoints: boolean;
+  hasAssignee: boolean;
+  // Aging
+  daysInBacklog: number;
+  daysSinceLastUpdate: number;
+}
+
+export interface BacklogMetrics {
+  totalIssues: number;
+  totalStoryPoints: number;
+  // Aging buckets
+  aging: {
+    fresh: number; // < 7 days
+    aging: number; // 7-30 days
+    stale: number; // > 30 days
+  };
+  // Readiness breakdown
+  readiness: {
+    ready: number; // Has description, AC, points
+    needsRefinement: number; // Missing key fields
+    inProgress: number; // Currently being refined
+  };
+  // Priority distribution
+  byPriority: {
+    highest: number;
+    high: number;
+    medium: number;
+    low: number;
+    lowest: number;
+  };
+  // Issue type distribution
+  byType: {
+    story: number;
+    bug: number;
+    task: number;
+    epic: number;
+    other: number;
+  };
+  // Trends
+  issuesTrend: number[]; // Last 4 weeks
+  velocityTrend: number[]; // Last 4 sprints
+  // WIP limits
+  wipIssues: number;
+  wipStoryPoints: number;
+}

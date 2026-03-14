@@ -1,7 +1,7 @@
 /**
  * PO Governance Dashboard - Main Page
  * 
- * Stage 1 Implementation: Delivery & Quality Foundation
+ * Stage 1 & 2 Implementation: Delivery, Quality & Backlog
  */
 
 import * as React from 'react';
@@ -14,8 +14,12 @@ import { SprintGoalStatus } from '@/components/governance/delivery/SprintGoalSta
 import { DefectDensityChart } from '@/components/governance/quality/DefectDensityChart';
 import { TestCoverageGauge } from '@/components/governance/quality/TestCoverageGauge';
 import { SecurityFindingsBadge } from '@/components/governance/quality/SecurityFindingsBadge';
+import { BacklogHealthCard } from '@/components/governance/backlog/BacklogHealthCard';
+import { BacklogAgingChart } from '@/components/governance/backlog/BacklogAgingChart';
+import { StoryReadinessChart } from '@/components/governance/backlog/StoryReadinessChart';
 import { useDeliveryMetrics } from '@/hooks/governance/useDeliveryMetrics';
 import { useQualityMetrics } from '@/hooks/governance/useQualityMetrics';
+import { useBacklogMetrics } from '@/hooks/governance/useBacklogMetrics';
 
 export default function GovernanceDashboard() {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -31,11 +35,17 @@ export default function GovernanceDashboard() {
     useMock: true,
   });
 
-  const isLoading = isLoadingDelivery || isLoadingQuality;
+  const { data: backlogMetrics, isLoading: isLoadingBacklog, refetch: refetchBacklog } = useBacklogMetrics({
+    productId: selectedProduct,
+    useMock: true,
+  });
+
+  const isLoading = isLoadingDelivery || isLoadingQuality || isLoadingBacklog;
 
   const handleRefresh = () => {
     refetchDelivery();
     refetchQuality();
+    refetchBacklog();
   };
 
   // Calculate days remaining for active sprint
@@ -121,18 +131,27 @@ export default function GovernanceDashboard() {
               />
             </div>
             
-            {/* Right Column - Operations */}
+            {/* Right Column - Backlog */}
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-gray-700">Operations</h2>
-              
-              {/* Placeholder for Backlog Health */}
-              <div className="p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-500">
-                <h3 className="font-medium text-gray-700 mb-2">Backlog Health</h3>
-                <p>Backlog widgets coming in Stage 2...</p>
-              </div>
-              
+              <h2 className="text-lg font-semibold text-gray-700">Backlog Health</h2>
+
+              <BacklogHealthCard
+                metrics={backlogMetrics}
+                isLoading={isLoadingBacklog}
+              />
+
+              <BacklogAgingChart
+                metrics={backlogMetrics}
+                isLoading={isLoadingBacklog}
+              />
+
+              <StoryReadinessChart
+                metrics={backlogMetrics}
+                isLoading={isLoadingBacklog}
+              />
+
               {/* Placeholder for Compliance */}
-              <div className="p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-500">
+              <div className="p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-500 mt-4">
                 <h3 className="font-medium text-gray-700 mb-2">Compliance</h3>
                 <p>Compliance widgets coming in Stage 4...</p>
               </div>
