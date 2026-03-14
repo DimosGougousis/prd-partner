@@ -1,39 +1,51 @@
 /**
- * Compliance Status Widget - GDPR/PCI status with expiry
- * 
- * TODO[STAGE-4]: Compliance Implementation
- *   - GDPR request count from internal tracking
- *   - PCI compliance expiry from compliance tool
- *   - RBAC: Restrict to compliance_officer role
+ * Compliance Status Widget - Framework compliance overview
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import type { ComplianceMetrics } from '@/types/governance/compliance';
 
 interface ComplianceStatusWidgetProps {
-  gdprRequestCount: number;
-  pciExpiryDate: Date | null;
-  checklistStatus: 'green' | 'amber' | 'red';
+  metrics: ComplianceMetrics | undefined;
   isLoading: boolean;
 }
 
-export function ComplianceStatusWidget({
-  gdprRequestCount,
-  pciExpiryDate,
-  checklistStatus,
-  isLoading,
-}: ComplianceStatusWidgetProps) {
-  // TODO: Calculate days until PCI expiry
-  const daysUntilExpiry = pciExpiryDate 
-    ? Math.ceil((pciExpiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    : null;
+export function ComplianceStatusWidget({ metrics, isLoading }: ComplianceStatusWidgetProps) {
+  const frameworks = metrics?.frameworks || [];
+  const overallScore = metrics?.overallScore ?? 0;
 
-  const statusConfig = {
-    green: { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
-    amber: { icon: AlertTriangle, color: 'text-yellow-500', bg: 'bg-yellow-50' },
-    red: { icon: Shield, color: 'text-red-500', bg: 'bg-red-50' },
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'compliant':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'in_progress':
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case 'non_compliant':
+        return <AlertTriangle className="w-4 h-4 text-red-500" />;
+      default:
+        return <Shield className="w-4 h-4 text-gray-400" />;
+    }
   };
+
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'compliant':
+        return 'bg-green-100 text-green-700';
+      case 'in_progress':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'non_compliant':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const openFindings = frameworks.reduce(
+    (sum, f) => sum + f.findings.filter((finding) => finding.status === 'open').length,
+    0
+  );
 
   if (isLoading) {
     return (
@@ -48,40 +60,48 @@ export function ComplianceStatusWidget({
     );
   }
 
-  const config = statusConfig[checklistStatus || 'amber'];
-  const Icon = config.icon;
-
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center justify-between">
-          <span>Compliance Status</span>
-          <Badge variant={checklistStatus === 'green' ? 'default' : 'destructive'}>
-            {checklistStatus || 'TODO'}
+          <span>Compliance</span>
+          <Badge className={overallScore >= 80 ? 'bg-green-100 text-green-700' : overallScore >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}>
+            {overallScore}%
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {/* GDPR */}
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600">GDPR Requests</span>
-            <span className="font-medium">{gdprRequestCount || '?'}</span>
-          </div>
-          
-          {/* PCI */}
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600">PCI Expiry</span>
-            <span className={`font-medium ${daysUntilExpiry && daysUntilExpiry < 30 ? 'text-red-500' : ''}`}>
-              {daysUntilExpiry !== null ? `${daysUntilExpiry} days` : 'TODO'}
+        {/* Frameworks */}
+        <div className="space-y-2 mb-3">
+          {frameworks.map((framework) => (
+            <div key={framework.id} className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                {getStatusIcon(framework.status)}
+                <span className="text-gray-700">{framework.name}</span>
+              </div>
+              <Badge variant="outline" className={`text-xs ${getStatusColor(framework.status)}`}>
+                {framework.score}%
+              </Badge>
+            </div>
+          ))}
+        </div>
+
+        {/* Findings Summary */}
+        <div className="pt-3 border-t">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Open Findings</span>
+            <span className={`font-medium ${openFindings > 0 ? 'text-red-600' : 'text-green-600'}`}>
+              {openFindings}
             </span>
           </div>
-          
-          {/* Status Summary */}
-          <div className={`flex items-center gap-2 p-2 rounded ${config.bg}`}>
-            <Icon className={`w-4 h-4 ${config.color}`} />
-            <span className={`text-xs ${config.color}`}>
-              {checklistStatus === 'green' ? 'All checks passing' : 'Action required'}
+        </div>
+
+        {/* Data Privacy */}
+        <div className="pt-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">GDPR Requests</span>
+            <span className="font-medium">
+              {metrics?.dataPrivacy.dataSubjectRequests.pending ?? 0} pending
             </span>
           </div>
         </div>

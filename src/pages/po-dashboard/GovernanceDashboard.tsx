@@ -1,7 +1,7 @@
 /**
  * PO Governance Dashboard - Main Page
  * 
- * Stage 1, 2 & 3 Implementation: Delivery, Quality, Backlog, Customer & Financial
+ * All Stages Implementation: Delivery, Quality, Backlog, Customer, Financial, Compliance & Team Health
  */
 
 import * as React from 'react';
@@ -21,11 +21,17 @@ import { NPSCsatTrendChart } from '@/components/governance/customer/NPSCsatTrend
 import { SupportTicketVolume } from '@/components/governance/customer/SupportTicketVolume';
 import { BudgetBurnChart } from '@/components/governance/financial/BudgetBurnChart';
 import { CostPerStoryPoint } from '@/components/governance/financial/CostPerStoryPoint';
+import { ComplianceStatusWidget } from '@/components/governance/compliance/ComplianceStatusWidget';
+import { AuditTrailStatus } from '@/components/governance/compliance/AuditTrailStatus';
+import { TeamSatisfactionGauge } from '@/components/governance/team/TeamSatisfactionGauge';
+import { SprintRetrospectiveSummary } from '@/components/governance/team/SprintRetrospectiveSummary';
 import { useDeliveryMetrics } from '@/hooks/governance/useDeliveryMetrics';
 import { useQualityMetrics } from '@/hooks/governance/useQualityMetrics';
 import { useBacklogMetrics } from '@/hooks/governance/useBacklogMetrics';
 import { useCustomerMetrics } from '@/hooks/governance/useCustomerMetrics';
 import { useFinancialMetrics } from '@/hooks/governance/useFinancialMetrics';
+import { useComplianceMetrics } from '@/hooks/governance/useComplianceMetrics';
+import { useTeamHealthMetrics } from '@/hooks/governance/useTeamHealthMetrics';
 
 export default function GovernanceDashboard() {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -56,7 +62,17 @@ export default function GovernanceDashboard() {
     useMock: true,
   });
 
-  const isLoading = isLoadingDelivery || isLoadingQuality || isLoadingBacklog || isLoadingCustomer || isLoadingFinancial;
+  const { data: complianceMetrics, isLoading: isLoadingCompliance, refetch: refetchCompliance } = useComplianceMetrics({
+    productId: selectedProduct,
+    useMock: true,
+  });
+
+  const { data: teamHealthMetrics, isLoading: isLoadingTeamHealth, refetch: refetchTeamHealth } = useTeamHealthMetrics({
+    productId: selectedProduct,
+    useMock: true,
+  });
+
+  const isLoading = isLoadingDelivery || isLoadingQuality || isLoadingBacklog || isLoadingCustomer || isLoadingFinancial || isLoadingCompliance || isLoadingTeamHealth;
 
   const handleRefresh = () => {
     refetchDelivery();
@@ -64,6 +80,8 @@ export default function GovernanceDashboard() {
     refetchBacklog();
     refetchCustomer();
     refetchFinancial();
+    refetchCompliance();
+    refetchTeamHealth();
   };
 
   // Calculate days remaining for active sprint
@@ -194,11 +212,28 @@ export default function GovernanceDashboard() {
                 isLoading={isLoadingFinancial}
               />
 
-              {/* Placeholder for Compliance */}
-              <div className="p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-500 mt-4">
-                <h3 className="font-medium text-gray-700 mb-2">Compliance</h3>
-                <p>Compliance widgets coming in Stage 4...</p>
-              </div>
+              {/* Compliance & Team Health */}
+              <h2 className="text-lg font-semibold text-gray-700 mt-6">Compliance & Team</h2>
+
+              <ComplianceStatusWidget
+                metrics={complianceMetrics}
+                isLoading={isLoadingCompliance}
+              />
+
+              <AuditTrailStatus
+                metrics={complianceMetrics}
+                isLoading={isLoadingCompliance}
+              />
+
+              <TeamSatisfactionGauge
+                metrics={teamHealthMetrics}
+                isLoading={isLoadingTeamHealth}
+              />
+
+              <SprintRetrospectiveSummary
+                metrics={teamHealthMetrics}
+                isLoading={isLoadingTeamHealth}
+              />
             </div>
           </div>
         </div>
