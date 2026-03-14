@@ -146,5 +146,4 @@ export function SprintBurndownChart({
   );
 }
 
-// Need React import for useMemo
-import * as React from 'react';
+
